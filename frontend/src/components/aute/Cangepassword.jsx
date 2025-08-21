@@ -37,6 +37,49 @@ const Changepassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Password rules
+  const passwordChecks = {
+    length: newPassword.length >= 8,
+    uppercase: /[A-Z]/.test(newPassword),
+    lowercase: /[a-z]/.test(newPassword),
+    number: /\d/.test(newPassword),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
+  };
+
+  const allValid = Object.values(passwordChecks).every(Boolean);
+
+  const strengthScore = Object.values(passwordChecks).filter(Boolean).length;
+  const strengthPercent = (strengthScore / 5) * 100;
+  const strengthColors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-yellow-500",
+    "bg-green-400",
+    "bg-green-600",
+  ];
+  const strengthColor =
+    strengthColors[strengthScore - 1] || "bg-gray-300";
+  const strengthLabels = [
+    "Very Weak",
+    "Weak",
+    "Fair",
+    "Strong",
+    "Very Strong",
+  ];
+  const strengthLabel = strengthLabels[strengthScore - 1] || "";
+
+  // ✅ Border color for password input
+  // const borderColors = [
+  //   "border-red-500",
+  //   "border-orange-500",
+  //   "border-yellow-500",
+  //   "border-green-400",
+  //   "border-green-600",
+  // ];
+  // const borderColor = newPassword
+  //   ? borderColors[strengthScore - 1] || "border-gray-300"
+  //   : "border-gray-300";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -48,6 +91,10 @@ const Changepassword = () => {
     }
     if (newPassword !== confirmPassword) {
       setError("New password and confirmation do not match.");
+      return;
+    }
+    if (!allValid) {
+      setError("Password does not meet requirements.");
       return;
     }
 
@@ -137,8 +184,6 @@ const Changepassword = () => {
                 type="button"
                 onClick={() => setShowCurrent((v) => !v)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center text-gray-500"
-                aria-label="Toggle current password visibility"
-                tabIndex={-1}
               >
                 {showCurrent ? <EyeOff /> : <Eye />}
               </button>
@@ -151,7 +196,7 @@ const Changepassword = () => {
               </label>
               <input
                 type={showNew ? "text" : "password"}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -161,11 +206,41 @@ const Changepassword = () => {
                 type="button"
                 onClick={() => setShowNew((v) => !v)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center text-gray-500"
-                aria-label="Toggle new password visibility"
-                tabIndex={-1}
               >
                 {showNew ? <EyeOff /> : <Eye />}
               </button>
+
+              {/* Password Strength Meter */}
+              {newPassword && (
+                <div className="mt-2">
+                  <div className="h-2 w-full bg-gray-200 rounded">
+                    <div
+                      className={`h-2 rounded ${strengthColor}`}
+                      style={{ width: `${strengthPercent}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs mt-1 font-medium text-gray-600">
+                    {strengthLabel}
+                  </p>
+                  <ul className="mt-2 space-y-1 text-xs">
+                    <li className={passwordChecks.length ? "text-green-600" : "text-gray-500"}>
+                      ✔ At least 8 characters
+                    </li>
+                    <li className={passwordChecks.uppercase ? "text-green-600" : "text-gray-500"}>
+                      ✔ At least 1 uppercase letter
+                    </li>
+                    <li className={passwordChecks.lowercase ? "text-green-600" : "text-gray-500"}>
+                      ✔ At least 1 lowercase letter
+                    </li>
+                    <li className={passwordChecks.number ? "text-green-600" : "text-gray-500"}>
+                      ✔ At least 1 number
+                    </li>
+                    <li className={passwordChecks.special ? "text-green-600" : "text-gray-500"}>
+                      ✔ At least 1 special character
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Confirm New Password */}
@@ -185,22 +260,21 @@ const Changepassword = () => {
                 type="button"
                 onClick={() => setShowConfirm((v) => !v)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center text-gray-500"
-                aria-label="Toggle confirm password visibility"
-                tabIndex={-1}
               >
                 {showConfirm ? <EyeOff /> : <Eye />}
               </button>
             </div>
 
-            <div className="pt- bg-orange-500 rounded-md ">
+            {/* Submit Button */}
+            <div className="pt-2 bg-orange-500 hover:bg-orange-600 rounded">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !allValid}
                 className={`w-full ${
-                  loading
-                    ? " cursor-not-allowed"
-                    : " hover:bg-orange-600"
-                } text-black font-medium py-2 sm:py-3  rounded-md transition-colors duration-200 flex items-center justify-center`}
+                  loading || !allValid
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-orange-500 hover:bg-orange-600"
+                } text-black font-medium py-2 sm:py-3 rounded-md transition-colors duration-200 flex items-center justify-center`}
               >
                 {loading && (
                   <svg

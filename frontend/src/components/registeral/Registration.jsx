@@ -655,7 +655,7 @@ const countries =
   "Zambia", "Zimbabwe"];
 
 const Registration = () => {
-  const [userId, setUserId] = useState('');
+  
   const [firstName, setFirstName] = useState('');
   const [fatherName, setFatherName] = useState('');
   const [grandFatherName, setGrandFatherName] = useState('');
@@ -677,7 +677,7 @@ const Registration = () => {
 
     try {
       const formData = new FormData();
-      formData.append("userId", userId);
+     
       formData.append("firstName", firstName);
       formData.append("fatherName", fatherName);
       formData.append("grandFatherName", grandFatherName);
@@ -698,7 +698,7 @@ const Registration = () => {
       setTimeout(() => setSuccessMessage(''), 5000);
 
       // Reset form
-      setUserId('');
+    
       setFirstName('');
       setFatherName('');
       setGrandFatherName('');
@@ -733,7 +733,7 @@ const Registration = () => {
 
         <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <InputField label="User ID" value={userId} onChange={setUserId} error={errors.userId} required placeholder="Enter user id" />
+           
             <InputField label="First Name" value={firstName} onChange={setFirstName} error={errors.firstName} required placeholder="Enter First Name" />
             <InputField label="Father Name" value={fatherName} onChange={setFatherName} error={errors.fatherName} required placeholder="Enter Father Name" />
             <InputField label="Grandfather Name" value={grandFatherName} onChange={setGrandFatherName} error={errors.grandFatherName} placeholder="Enter Grandfather Name" />
@@ -760,7 +760,7 @@ const Registration = () => {
               {errors.dob && <small className="text-red-500">{errors.dob}</small>}
             </div>
 
-            <div>
+            {/* <div>
               <label  className="block mb-1 font-medium invisible  ">Profile Picture</label>
               <input
                 type="file"
@@ -769,7 +769,7 @@ const Registration = () => {
                 className={`w-full invisible px-3 py-2 border-2 rounded ${errors.picture ? 'border-red-500' : 'border-gray-300'}`}
               />
               {errors.picture && <small className="text-red-500">{errors.picture}</small>}
-            </div>
+            </div> */}
           </div>
 
           <div className="bg-orange-500 rounded-lg text-center flex items-center justify-center">

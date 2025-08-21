@@ -24,6 +24,16 @@ import TrackerLayout from './components/aute/TrackerLayout.jsx';
 import BiografyEdit from './components/registeral/BiografyEdit.jsx'
 import UseBiography from './components/admin/UseBiography.jsx'
 import MyBiography from './components/students/MyBiography.jsx';
+import AddCourse from './components/departments/AddCourse.jsx'
+import CourseList from './components/departments/CourseList.jsx';
+import AddCourses from './components/admin/AddCourses.jsx';
+import AllCourseList from './components/admin/AllCoursesList.jsx';
+import AddDepartments from './components/admin/AddDepartments.jsx';
+import AddCollages from './components/admin/AddCollages.jsx';
+import CollegeList from './components/admin/CollageList.jsx';
+import DepartmentList from './components/admin/DepartmentList.jsx';
+import UserRegistration from './components/admin/UserRegistration.jsx'
+
 const router=createBrowserRouter([
 
    /////////Super Public Route/////////////     
@@ -125,7 +135,7 @@ const router=createBrowserRouter([
         element: <PrivateRoute allowedRoles={["registeral"]} />,
         children: [
                 {
-                   path:'/user-biography/:userId',
+                   path:'/user-biography/:username',
                    element:<UseBiography/>
               },
               {
@@ -156,7 +166,32 @@ const router=createBrowserRouter([
           element:<AdminDashboard/>,
           children:[
             {
-            
+              path:'userregistration',
+              element:<UserRegistration/>
+            },
+            {
+              path:'addcourse',
+              element:<AddCourses/>
+            },
+            {
+              path:'courseslist',
+              element:<AllCourseList/>
+            },
+            {
+              path:'add-departmrnt',
+              element:<AddDepartments/>
+            },
+            {
+              path:'add-collage',
+              element:<AddCollages/>
+            },
+            {
+              path:'collages-list',
+              element:<CollegeList/>
+            },
+            {
+              path:'departments-list',
+              element:<DepartmentList/>
             }
           ]
         },
@@ -171,7 +206,12 @@ const router=createBrowserRouter([
           element:<DepartmentDashboard/>,
           children:[
             {
-            
+             path:'addcourse',
+             element:<AddCourse/>
+            },
+            {
+              path:'courselist',
+              element:<CourseList/>
             }
           ]
         },

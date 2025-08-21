@@ -37,22 +37,15 @@ useEffect(() => {
   ];
 
   const tabsside = [
-    { name: "New", label: "Students", link: "Students", icon: <FaRegIdBadge /> },
-    { name: "Student", label: "Teachers", link: "Teachers", icon: <FaUserEdit /> },
-    { name: "Seting", label: "Collages", link: "Collages", icon: <FaLock /> },
-    { name: "Data", label: "Departments", link: "Departments", icon: <FaTags /> },
-    { name: "Teachers", label: "Staff", link: "Staff", icon: <FaUsers /> },
-    { name: "Class", label: "Report", link: "Report", icon: <FaLayerGroup /> },
-    { name: "Dorm", label: "Account", link: "Account", icon: <FaIdCard /> },
-    { name: "medical", label: "Security", link: "Security", icon: <FaBriefcaseMedical /> },
-    { name: "New", label: "Students", link: "Students", icon: <FaRegIdBadge /> },
-    { name: "Student", label: "Teachers", link: "Teachers", icon: <FaUserEdit /> },
-    { name: "Seting", label: "Collages", link: "Collages", icon: <FaLock /> },
-    { name: "Data", label: "Departments", link: "Departments", icon: <FaTags /> },
-    { name: "Teachers", label: "Staff", link: "Staff", icon: <FaUsers /> },
-    { name: "Class", label: "Report", link: "Report", icon: <FaLayerGroup /> },
-    { name: "Dorm", label: "Account", link: "Account", icon: <FaIdCard /> },
-    { name: "medical", label: "Security", link: "Security", icon: <FaBriefcaseMedical /> },
+  
+    { name: "Add Course", label: "Add Course", link: "addcourse", icon: <FaUserEdit /> },
+    { name: "Course List", label: "Course List", link: "courseslist", icon: <FaLock /> },
+    { name: "Add Departments", label: "Add Departments", link: "add-departmrnt", icon: <FaTags /> },
+    { name: "Add Collages", label: "Add Collages", link: "add-collage", icon: <FaUsers /> },
+    { name: "Departments List", label: "Departments List", link: "departments-list", icon: <FaLayerGroup /> },
+    { name: "Collages List", label: "Collages List", link: "collages-list", icon: <FaIdCard /> },
+    { name: "User Registration", label: "User Registration", link: "userregistration", icon: <FaBriefcaseMedical /> },
+  
   ];
 
   return (

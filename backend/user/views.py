@@ -40,44 +40,7 @@ class UserRegisterView(APIView):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-################################ Login start##################################################
-
-  
-# DEFAULT_PASSWORD = "Default@123"
-
-# class UsersAuthsLoginView(APIView):
-#     def post(self, request):
-#         username = request.data.get('username')
-#         password = request.data.get('password')
-
-#         try:
-#             user = UsersAuths.objects.get(username=username)
-#         except UsersAuths.DoesNotExist:
-#             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         if not check_password(password, user.password):
-#             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         refresh = RefreshToken.for_user(user)
-
-#         role = getattr(user, 'role', None) 
-
-#         if check_password(DEFAULT_PASSWORD, user.password):
-#             return Response({
-#                 "detail": "You must change your default password before proceeding.",
-#                 "change_password_required": True,
-#                 "access": str(refresh.access_token),
-#                 "refresh": str(refresh),
-#                 "role": role,
-#             }, status=status.HTTP_403_FORBIDDEN)
-
-#         return Response({
-#             "refresh": str(refresh),
-#             "access": str(refresh.access_token),
-#             "role": role,
-#         })
 
 
 DEFAULT_PASSWORD = "Default@123"
@@ -109,14 +72,14 @@ class UsersAuthsLoginView(APIView):
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
                 "role": role,
-                "user": serializer.data,   # ✅ include user profile here
+                "user": serializer.data,   
             }, status=status.HTTP_403_FORBIDDEN)
 
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "role": role,
-            "user": serializer.data,   # ✅ include user profile here
+            "user": serializer.data, 
         })
 
 #############################change password################################################
@@ -161,7 +124,7 @@ class RetriveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 class RegisterViewSet(viewsets.ModelViewSet):
     queryset = UsersAuths.objects.all()
     serializer_class = UsersAuthsSerializer
-    lookup_field = 'userId'
+    lookup_field = 'username'
     parser_classes = (MultiPartParser, FormParser)
 
 

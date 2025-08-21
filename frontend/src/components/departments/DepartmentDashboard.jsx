@@ -26,8 +26,8 @@ useEffect(() => {
   }, []);
 
   const tabs = [
-    { name: "registration", label: "Registration", link: "registration" },
-    { name: "biography", label: "Fill Biography", link: "biography-edit" },
+    
+    
     { name: "security", label: "Security" },
     { name: "metadata", label: "Metadata" },
     { name: "associations", label: "Associations" },
@@ -37,22 +37,15 @@ useEffect(() => {
   ];
 
   const tabsside = [
-    { name: "New", label: "Students", link: "Students", icon: <FaRegIdBadge /> },
-    { name: "Student", label: "Teachers", link: "Teachers", icon: <FaUserEdit /> },
-    { name: "Seting", label: "Collages", link: "Collages", icon: <FaLock /> },
+ 
+    { name: "Add Course", label: "Add Course", link: "addcourse", icon: <FaUserEdit /> },
+    { name: "Course List", label: "Course List", link: "courselist", icon: <FaLock /> },
     { name: "Data", label: "Departments", link: "Departments", icon: <FaTags /> },
     { name: "Teachers", label: "Staff", link: "Staff", icon: <FaUsers /> },
     { name: "Class", label: "Report", link: "Report", icon: <FaLayerGroup /> },
     { name: "Dorm", label: "Account", link: "Account", icon: <FaIdCard /> },
     { name: "medical", label: "Security", link: "Security", icon: <FaBriefcaseMedical /> },
-    { name: "New", label: "Students", link: "Students", icon: <FaRegIdBadge /> },
-    { name: "Student", label: "Teachers", link: "Teachers", icon: <FaUserEdit /> },
-    { name: "Seting", label: "Collages", link: "Collages", icon: <FaLock /> },
-    { name: "Data", label: "Departments", link: "Departments", icon: <FaTags /> },
-    { name: "Teachers", label: "Staff", link: "Staff", icon: <FaUsers /> },
-    { name: "Class", label: "Report", link: "Report", icon: <FaLayerGroup /> },
-    { name: "Dorm", label: "Account", link: "Account", icon: <FaIdCard /> },
-    { name: "medical", label: "Security", link: "Security", icon: <FaBriefcaseMedical /> },
+ 
   ];
 
   return (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -6,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = "http://127.0.0.1:8000/api";
 const MEDIA_BASE_URL = "http://127.0.0.1:8000";
-
 
 const SECTION_COLORS = {
   basic: "from-blue-100 to-blue-200 border-blue-300",
@@ -18,12 +16,12 @@ const SECTION_COLORS = {
 };
 
 export default function UseBiography() {
-  const { userId } = useParams();
+  const { username } = useParams();
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
-
+    userId: "",
     firstName: "",
     fatherName: "",
     grandFatherName: "",
@@ -76,10 +74,11 @@ export default function UseBiography() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/register/${userId}/`);
+        const res = await axios.get(`${API_BASE_URL}/register/${username}/`);
         const user = res.data;
 
         setFormData({
+          userId: user.userId || " ",
           firstName: user.firstName || "",
           fatherName: user.fatherName || "",
           grandFatherName: user.grandFatherName || "",
@@ -101,8 +100,7 @@ export default function UseBiography() {
           is_active: user.is_active || false,
           picture: null,
         });
-
-       setPreview(user.picture || null);
+        setPreview(user.picture || null);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -111,7 +109,7 @@ export default function UseBiography() {
     };
 
     fetchUser();
-  }, [userId]);
+  }, [username]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -125,61 +123,76 @@ export default function UseBiography() {
         [name]: type === "checkbox" ? checked : value,
       }));
     }
+    
+    // Clear field-specific error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   // Submit updated data
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setErrors({});
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+    setErrorMessage('');
+    setSuccessMessage('');
 
-  try {
-    const payload = new FormData();
+    try {
+      const payload = new FormData();
 
-    for (const key in formData) {
-      if (formData[key] !== null && formData[key] !== "") {
-        if (key === "is_active") {
-          payload.append(key, formData[key] ? "true" : "false");
-        } else if (key === "picture" && formData[key] instanceof File) {
-          payload.append("picture", formData[key]);
-        } else if (key !== "picture") {
-          payload.append(key, formData[key]);
+      for (const key in formData) {
+        if (formData[key] !== null && formData[key] !== "") {
+          if (key === "is_active") {
+            payload.append(key, formData[key] ? "true" : "false");
+          } else if (key === "picture" && formData[key] instanceof File) {
+            payload.append("picture", formData[key]);
+          } else if (key !== "picture") {
+            payload.append(key, formData[key]);
+          }
         }
       }
-    }
 
-    const res = await axios.patch(
-      `${API_BASE_URL}/register/${userId}/`,
-      payload,
-      {
-        headers: {
+      const res = await axios.patch(
+        `${API_BASE_URL}/register/${username}/`,
+        payload,
+        {
+          headers: {
+            "Accept": "application/json",
+          },
+        }
+      );
       
-          "Accept": "application/json",
-        },
-      }
-    );
-      setSuccessMessage('Registration successful!');
+      setSuccessMessage('User information updated successfully!');
       setTimeout(() => setSuccessMessage(''), 5000);
-      navigate("/registeraldashboard/biography-edit");
-    // alert("User updated successfully!");
-    console.log("Updated:", res.data);
-  } catch (err) {
-    if (err.response && err.response.status === 400) {
-      // setErrors(err.response.data);
-     setErrorMessage('Registration failed. Check your network or input.');
-     setTimeout(() => setErrorMessage(''), 5000);
-      console.error("Validation errors:", err.response.data);
-    } else {
-      console.error("Error updating user:", err);
+       navigate("/registeraldashboard/biography-edit");
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        // Set field-specific validation errors
+        if (err.response.data) {
+          setErrors(err.response.data);
+        }
+        
+        setErrorMessage('Please correct the errors below.');
+        console.error("Validation errors:", err.response.data);
+      } else {
+        setErrorMessage('An unexpected error occurred. Please try again.');
+        console.error("Error updating user:", err);
+      }
     }
-  }
-};
-
+  };
 
   if (loading) return <p className="p-6">Loading user data...</p>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-bold mb-6">Edit User Biography</h1>
+      
+   
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar Upload */}
         <div className="flex items-center space-x-4 mb-4">
@@ -196,7 +209,12 @@ export default function UseBiography() {
               </div>
             )}
           </div>
-          <input type="file" name="picture" onChange={handleChange} />
+          <div>
+            <input type="file" name="picture" onChange={handleChange} />
+            {errors.picture && (
+              <p className="text-red-500 text-sm mt-1">{errors.picture}</p>
+            )}
+          </div>
         </div>
 
         {/* Sections */}
@@ -205,6 +223,13 @@ export default function UseBiography() {
           "basic",
           SECTION_COLORS.basic,
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Input
+              name="userId"
+              label="User ID"
+              value={formData.userId}
+              onChange={handleChange}
+              error={errors.userId}
+            />
             <Input
               name="firstName"
               label="First Name"
@@ -382,27 +407,33 @@ export default function UseBiography() {
                 className="mr-2"
               />
               <label>Is Active</label>
+              {errors.is_active && (
+                <p className="text-red-500 text-sm ml-2">{errors.is_active}</p>
+              )}
             </div>
           </div>
         )}
 
-         {successMessage && (
-          <div className="mb-6 p-3 bg-green-200 text-green-800 rounded text-center font-medium">{successMessage}</div>
-        )}
-        {errorMessage && (
-          <div className="mb-6 p-3 bg-red-200 text-red-800 rounded text-center font-medium">{errorMessage}</div>
-        )}
+           {successMessage && (
+        <div className="mb-6 p-3 bg-green-200 text-green-800 rounded text-center font-medium">
+          {successMessage}
+        </div>
+      )}
+      
+      {errorMessage && (
+        <div className="mb-6 p-3 bg-red-200 text-red-800 rounded text-center font-medium">
+          {errorMessage}
+        </div>
+      )}
 
-      <div className="bg-orange-600 hover:bg-orange-700 flex items-center justify-center rounded">
+        <div className="bg-orange-600 hover:bg-orange-700 flex items-center justify-center rounded">
           <button
-          type="submit"
-          className=" text-white px-80 py-2 rounded "
-       
-
-        >
-          Save Changes
-        </button>
-      </div>
+            type="submit"
+            className="text-white px-80 py-2 rounded"
+          >
+            Save Changes
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -434,9 +465,15 @@ function Input({ label, name, value, onChange, error, type = "text" }) {
         name={name}
         value={value}
         onChange={onChange}
-        className="border px-3 py-2 rounded w-full focus:outline-none focus:ring focus:border-blue-300"
+        className={`border px-3 py-2 rounded w-full focus:outline-none focus:ring ${
+          error ? "border-red-500 focus:border-red-300" : "focus:border-blue-300"
+        }`}
       />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <p className="text-red-500 text-sm mt-1">
+          {Array.isArray(error) ? error.join(", ") : error}
+        </p>
+      )}
     </div>
   );
 }
@@ -450,7 +487,9 @@ function Select({ label, name, value, onChange, options, error }) {
         name={name}
         value={value}
         onChange={onChange}
-        className="border px-3 py-2 rounded w-full focus:outline-none focus:ring focus:border-blue-300"
+        className={`border px-3 py-2 rounded w-full focus:outline-none focus:ring ${
+          error ? "border-red-500 focus:border-red-300" : "focus:border-blue-300"
+        }`}
       >
         <option value="">Select {label}</option>
         {options.map((opt) => (
@@ -459,7 +498,11 @@ function Select({ label, name, value, onChange, options, error }) {
           </option>
         ))}
       </select>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <p className="text-red-500 text-sm mt-1">
+          {Array.isArray(error) ? error.join(", ") : error}
+        </p>
+      )}
     </div>
   );
 }

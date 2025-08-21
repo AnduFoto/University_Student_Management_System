@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',  
     'user',
+    'courses',
+    'collages',
 ]
 
 MIDDLEWARE = [
@@ -68,7 +70,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'StudentManagmentSystemDB',  
+        'NAME': 'Student',  
         'USER': 'postgres',
         'PASSWORD': '1234', 
         'HOST': 'localhost',

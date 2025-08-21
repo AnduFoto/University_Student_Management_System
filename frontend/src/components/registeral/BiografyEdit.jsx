@@ -115,7 +115,7 @@ export default function StudentsList() {
           <tbody>
             {pageStudents.length > 0 ? (
               pageStudents.map((student, index) => (
-                <tr key={student.userId} className="hover:bg-gray-100">
+                <tr key={student.username} className="hover:bg-gray-100">
                   <td className="border px-3 py-2">{startIndex + index + 1}</td>
                   <td className="border px-3 py-2 text-center">
                     {student.picture ? (
@@ -174,7 +174,7 @@ export default function StudentsList() {
                     )}
                   </td>
                   <td className="border px-3 py-2 flex justify-center">
-                    <Link to={`/user-biography/${student.userId}`}>
+                    <Link to={`/user-biography/${student.username}`}>
                       <button className="bg-orange-500 text-white p-2 rounded hover:bg-orange-600 flex items-center gap-1">
                         Edit <FaEdit />
                       </button>
