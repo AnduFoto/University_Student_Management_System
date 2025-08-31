@@ -16,11 +16,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'corsheaders',
     'rest_framework_simplejwt',  
     'user',
     'courses',
     'collages',
+    'student',
+    
 ]
 
 MIDDLEWARE = [
@@ -70,7 +73,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Student',  
+        'NAME': 'StudentDB',  
         'USER': 'postgres',
         'PASSWORD': '1234', 
         'HOST': 'localhost',
@@ -100,7 +103,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Media files (for uploaded photos)
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -111,14 +114,16 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10  
+    'PAGE_SIZE': 10000 
 }
 
 AUTHENTICATION_BACKENDS = ['user.auth_backend.UsersAuthBackend']
 
 SIMPLE_JWT = {
-    'USER_ID_FIELD': 'userId',  
+    'USER_ID_FIELD': 'username',  
     'USER_ID_CLAIM': 'user_id',
 }
 
 AUTH_USER_MODEL = 'user.UsersAuths'
+
+

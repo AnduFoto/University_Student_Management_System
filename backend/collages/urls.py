@@ -1,11 +1,15 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import CollagesViewSet, DepartmentViewSet
 
-router = DefaultRouter()
-router.register(r'collages', CollagesViewSet, basename='collages')
-router.register(r'departments', DepartmentViewSet, basename='departments')
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # College endpoints
+    path('colleges/', views.CollegeListCreateView.as_view(), name='college-list'),
+    path('colleges/<str:pk>/', views.CollegeDetailView.as_view(), name='college-detail'),
+    path('colleges/<str:college_id>/departments/', views.CollegeDepartmentsListView.as_view(), name='college-departments'),
+    
+    # Department endpoints
+    path('departments/', views.DepartmentListCreateView.as_view(), name='department-list'),
+    path('departments/<str:pk>/', views.DepartmentDetailView.as_view(), name='department-detail'),
+    
 ]

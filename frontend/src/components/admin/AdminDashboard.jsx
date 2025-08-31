@@ -3,16 +3,19 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import AdminNavbar from './AdminNavbar'
-import {
-  FaRegIdBadge,
-  FaUserEdit,
-  FaLock,
-  FaTags,
-  FaUsers,
-  FaLayerGroup,
-  FaIdCard,
-  FaBriefcaseMedical
+import { 
+  FaUsers,        // plural users
+  FaPlusCircle,   // for adding items (like Add Course)
+  FaBook,         // for courses
+  FaUniversity,   // for departments / academics
+  FaSchool,       // for colleges
+  FaLayerGroup,   // for dept list
+  FaClipboardList,// for college list
+  FaUserPlus,     // for user registration
+  FaUsersCog,     // for user management
+  FaKey           // for password reset
 } from "react-icons/fa";
+
 
 const Registeraldashboard = () => {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -36,17 +39,21 @@ useEffect(() => {
     { name: "medical", label: "Medical" }
   ];
 
-  const tabsside = [
-  
-    { name: "Add Course", label: "Add Course", link: "addcourse", icon: <FaUserEdit /> },
-    { name: "Course List", label: "Course List", link: "courseslist", icon: <FaLock /> },
-    { name: "Add Departments", label: "Add Departments", link: "add-departmrnt", icon: <FaTags /> },
-    { name: "Add Collages", label: "Add Collages", link: "add-collage", icon: <FaUsers /> },
-    { name: "Departments List", label: "Departments List", link: "departments-list", icon: <FaLayerGroup /> },
-    { name: "Collages List", label: "Collages List", link: "collages-list", icon: <FaIdCard /> },
-    { name: "User Registration", label: "User Registration", link: "userregistration", icon: <FaBriefcaseMedical /> },
-  
-  ];
+
+
+
+const tabsside = [
+  { name: "Users", label: "Users", link: "users-list", icon: <FaUsers /> },
+  { name: "Add Course", label: "Add Course", link: "addcourse", icon: <FaPlusCircle /> },
+  { name: "Course List", label: "Course List", link: "courseslist", icon: <FaBook /> },
+  { name: "Add Departments", label: "Add Departments", link: "add-departmrnt", icon: <FaUniversity /> },
+  { name: "Add Colleges", label: "Add Colleges", link: "add-collage", icon: <FaSchool /> },
+  { name: "Departments List", label: "Departments List", link: "departments-list", icon: <FaLayerGroup /> },
+  { name: "Colleges List", label: "Colleges List", link: "collages-list", icon: <FaClipboardList /> },
+  { name: "User Registration", label: "User Registration", link: "userregistration", icon: <FaUserPlus /> },
+  { name: "User Management", label: "User Management", link: "usermanagement", icon: <FaUsersCog /> },
+  { name: "Password Reset", label: "Password Reset", link: "password-reset", icon: <FaKey /> },
+];
 
   return (
     <div className="h-screen w-full bg-gray-100 overflow-hidden">

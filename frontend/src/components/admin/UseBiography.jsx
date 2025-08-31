@@ -74,7 +74,7 @@ export default function UseBiography() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/register/${username}/`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/register/${username}/`);
         const user = res.data;
 
         setFormData({
@@ -157,7 +157,7 @@ export default function UseBiography() {
       }
 
       const res = await axios.patch(
-        `${API_BASE_URL}/register/${username}/`,
+        `${import.meta.env.VITE_API_BASE_URL}/register/${username}/`,
         payload,
         {
           headers: {
@@ -224,7 +224,7 @@ export default function UseBiography() {
           SECTION_COLORS.basic,
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
-              name="userId"
+              name="userId" 
               label="User ID"
               value={formData.userId}
               onChange={handleChange}
@@ -461,7 +461,7 @@ function Input({ label, name, value, onChange, error, type = "text" }) {
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
       <input
-        type={type}
+        type={type} required
         name={name}
         value={value}
         onChange={onChange}

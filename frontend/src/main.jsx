@@ -33,6 +33,11 @@ import AddCollages from './components/admin/AddCollages.jsx';
 import CollegeList from './components/admin/CollageList.jsx';
 import DepartmentList from './components/admin/DepartmentList.jsx';
 import UserRegistration from './components/admin/UserRegistration.jsx'
+import AllUsersList from './components/admin/AllUsersList.jsx';
+import RegularRegistration from './components/registeral/RegularRegistration.jsx'
+import RegisteredStudent from './components/registeral/RegisteredStudent.jsx'
+import UserManagement from './components/admin/UserManagement.jsx'
+import UserPasswordReset from './components/admin/UserPasswordReset.jsx'
 
 const router=createBrowserRouter([
 
@@ -143,8 +148,16 @@ const router=createBrowserRouter([
           element:<Registeraldashboard/>,
           children:[
             {
-              path:'registration',
+              path:'registration/freshman',
               element:<Registration/>
+            },
+             {
+              path:'registration',
+              element:<RegularRegistration/>
+            },
+            {
+              path:'registratered/student',
+              element:<RegisteredStudent/>
             },
               {
               path:'biography-edit',
@@ -192,6 +205,18 @@ const router=createBrowserRouter([
             {
               path:'departments-list',
               element:<DepartmentList/>
+            },
+            {
+              path:'users-list',
+              element:<AllUsersList/>
+            },
+            {
+              path:'usermanagement',
+              element:<UserManagement/>
+            },
+            {
+              path:'password-reset',
+              element:<UserPasswordReset/>
             }
           ]
         },

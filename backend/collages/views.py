@@ -1,18 +1,36 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser
-from .models import Collages, Department
-from .serializers import CollagesSerializer, DepartmentSerializer
-
-# Create your views here.
 
 
-class CollagesViewSet(viewsets.ModelViewSet):
-    queryset = Collages.objects.all()
-    serializer_class = CollagesSerializer
-    permission_classes = [IsAdminUser]  # Only admin users can access
+# collages/views.py
+from rest_framework import generics, permissions
+from .models import College, Department
+from .serializers import CollegeSerializer, DepartmentSerializer
 
-class DepartmentViewSet(viewsets.ModelViewSet):
+class CollegeListCreateView(generics.ListCreateAPIView):
+    queryset = College.objects.all()
+    serializer_class = CollegeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CollegeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = College.objects.all()
+    serializer_class = CollegeSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class DepartmentListCreateView(generics.ListCreateAPIView):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-    permission_classes = [IsAdminUser]  # Only admin users can access
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+class DepartmentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CollegeDepartmentsListView(generics.ListAPIView):
+    serializer_class = DepartmentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        college_id = self.kwargs['college_id']
+        return Department.objects.filter(college_id=college_id)
+    
+    

@@ -18,6 +18,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 #############################User Registration################################################
 class UserRegisterView(APIView):
+
     def post(self, request):
         data = request.data.copy() 
     
@@ -128,3 +129,58 @@ class RegisterViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
 
 
+
+
+    
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from django.db import transaction
+import logging
+from .models import UsersAuths, DEFAULT_PASSWORD
+
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def reset_user_password(request, username):
+    try:
+        user = UsersAuths.objects.get(username=username)
+        
+        # Store original picture info before any changes
+        original_picture_info = None
+        if user.picture:
+            original_picture_info = {
+                'name': user.picture.name,
+                'url': user.picture.url if hasattr(user.picture, 'url') else None
+            }
+        
+        # Reset the password using the model method
+        user.reset_to_default_password()
+        
+        # Build response data
+        user_data = {
+            "username": user.username,
+            "full_name": f"{user.firstName} {user.fatherName} {user.grandFatherName}",
+            "new_password": DEFAULT_PASSWORD,
+            "detail": "Password reset successfully!",
+        }
+        
+        # Add picture URL if available
+        if user.picture:
+            try:
+                user_data["picture"] = request.build_absolute_uri(user.picture.url)
+            except:
+                user_data["picture"] = None
+                # If we had original picture info but lost it, add a warning
+                if original_picture_info:
+                    user_data["warning"] = "Profile image may need to be reuploaded due to path issues."
+        
+        return Response(user_data)
+        
+    except UsersAuths.DoesNotExist:
+        return Response({"detail": "User not found"}, status=404)
+    except Exception as e:
+        logger.error(f"Error resetting password for {username}: {str(e)}")
+        return Response({"detail": f"Error resetting password: {str(e)}"}, status=500)

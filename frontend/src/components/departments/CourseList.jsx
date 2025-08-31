@@ -1,114 +1,4 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
 
-// const CourseList = () => {
-//   const [courses, setCourses] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [departments, setDepartments] = useState([]);
-//   const [selectedDept, setSelectedDept] = useState("All");
-
-//   const token = localStorage.getItem("access");
-
-//   // Fetch all courses
-//   const fetchCourses = async () => {
-//     setLoading(true);
-//     try {
-//       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/courses/`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       const courseList = Array.isArray(res.data) ? res.data : res.data.results || [];
-//       setCourses(courseList);
-
-//       // Extract unique departments
-//       const deptList = ["All", ...new Set(courseList.map((c) => c.course_department))];
-//       setDepartments(deptList);
-//     } catch (err) {
-//       console.error("Failed to fetch courses:", err);
-//       setCourses([]);
-//       setDepartments(["All"]);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchCourses();
-//   }, []);
-
-//   const filteredCourses =
-//     selectedDept === "All"
-//       ? courses
-//       : courses.filter((c) => c.course_department === selectedDept);
-
-//   if (loading) return <p>Loading courses...</p>;
-
-//   return (
-//     <div style={{ maxWidth: "900px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>
-//       <h2 style={{ textAlign: "center", margin: "20px 0" }}>Course List</h2>
-
-//       {/* Department Filter */}
-//       <div style={{ marginBottom: "20px" }}>
-//         <label>
-//           Filter by Department:{" "}
-//           <select
-//             value={selectedDept}
-//             onChange={(e) => setSelectedDept(e.target.value)}
-//             style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid #ccc" }}
-//           >
-//             {departments.map((dept) => (
-//               <option key={dept} value={dept}>
-//                 {dept}
-//               </option>
-//             ))}
-//           </select>
-//         </label>
-//       </div>
-
-//       {filteredCourses.length === 0 ? (
-//         <p>No courses available for this department.</p>
-//       ) : (
-//         <table
-//           style={{
-//             width: "100%",
-//             borderCollapse: "collapse",
-//             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-//           }}
-//         >
-//           <thead style={{ background: "#f0f0f0" }}>
-//             <tr>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Code</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Title</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Department</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Credit</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Year</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Semester</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Category</th>
-//               <th style={{ padding: "10px", border: "1px solid #ddd" }}>Prerequisite</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filteredCourses.map((course, idx) => (
-//               <tr key={`${course.course_code}-${idx}`}>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_code}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_title}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_department}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_credit}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_taken_year}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_taken_semester}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>{course.course_category}</td>
-//                 <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-//                   {course.course_prerequisite || "-"}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default CourseList;
 
 
 
@@ -128,20 +18,31 @@ const CourseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10
+  const itemsPerPage = 10;
 
   const token = localStorage.getItem("access");
 
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/courses/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const courseList = Array.isArray(res.data) ? res.data : res.data.results || [];
-      setCourses(courseList);
-      setDepartments(["All", ...new Set(courseList.map((c) => c.course_department))]);
-      setCategories(["All", ...new Set(courseList.map((c) => c.course_category))]);
+      let allCourses = [];
+      let page = 1;
+      let hasNext = true;
+
+      while (hasNext) {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/courses/?page=${page}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = res.data.results || [];
+        allCourses = [...allCourses, ...data];
+        hasNext = !!res.data.next;
+        page++;
+      }
+
+      setCourses(allCourses);
+      setDepartments(["All", ...new Set(allCourses.map((c) => c.course_department))]);
+      setCategories(["All", ...new Set(allCourses.map((c) => c.course_category))]);
     } catch (err) {
       console.error("Failed to fetch courses:", err);
       setCourses([]);
@@ -195,6 +96,7 @@ const CourseList = () => {
 
   const exportToCSV = () => {
     const headers = [
+      "No",
       "Code",
       "Title",
       "Department",
@@ -204,7 +106,8 @@ const CourseList = () => {
       "Category",
       "Prerequisite",
     ];
-    const rows = filteredCourses.map((c) => [
+    const rows = filteredCourses.map((c, idx) => [
+      idx + 1,
       c.course_code,
       c.course_title,
       c.course_department,
@@ -214,8 +117,7 @@ const CourseList = () => {
       c.course_category,
       c.course_prerequisite || "-",
     ]);
-    const csvContent =
-      [headers, ...rows].map((e) => e.join(",")).join("\n");
+    const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -274,7 +176,7 @@ const CourseList = () => {
     );
 
   return (
-    <div className="max-w-7xl mx-auto p-4 font-sans">
+    <div className="max-w-7xl mx-auto p- font-sans">
       <h2 className="text-4xl font-bold text-center mb-6 text-gray-800">Course Dashboard</h2>
 
       {/* Search & Filters */}
@@ -296,7 +198,9 @@ const CourseList = () => {
             className="px-3 py-2 rounded-lg border border-gray-300"
           >
             {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
             ))}
           </select>
 
@@ -309,7 +213,9 @@ const CourseList = () => {
             className="px-3 py-2 rounded-lg border border-gray-300"
           >
             {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
         </div>
@@ -329,6 +235,7 @@ const CourseList = () => {
           <table className="min-w-full bg-white rounded-xl shadow-lg overflow-hidden">
             <thead className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
               <tr>
+                <th className="px-6 py-3">No</th>
                 {[
                   { key: "course_code", label: "Code" },
                   { key: "course_title", label: "Title" },
@@ -344,7 +251,7 @@ const CourseList = () => {
                   return (
                     <th
                       key={col.key}
-                      className="px-6 py-3 cursor-pointer select-none"
+                      className="px- py-3 cursor-pointer select-none"
                       onClick={() => col.key !== "actions" && toggleSort(col.key)}
                     >
                       <div className="flex items-center justify-between">
@@ -362,6 +269,9 @@ const CourseList = () => {
                   key={`${course.course_code}-${idx}`}
                   className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
                 >
+                  <td className="px-6 py-4 border-b border-gray-200 font-mono text-gray-700">
+                    {(currentPage - 1) * itemsPerPage + idx + 1}
+                  </td>
                   <td className="px-6 py-4 border-b border-gray-200 font-mono text-gray-700">
                     {course.course_code}
                   </td>
@@ -411,23 +321,23 @@ const CourseList = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
 
-          {/* Pagination */}
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                className={`px-3 py-1 rounded-md ${
-                  page === currentPage
-                    ? "bg-purple-500 text-white shadow-md"
-                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-2 flex-wrap">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+            <button
+              key={num}
+              onClick={() => setCurrentPage(num)}
+              className={`px-3 py-1 rounded ${
+                currentPage === num ? "bg-purple-500 text-white" : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              {num}
+            </button>
+          ))}
         </div>
       )}
     </div>

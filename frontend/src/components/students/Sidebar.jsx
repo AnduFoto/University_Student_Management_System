@@ -39,8 +39,8 @@ const Sidebar = () => {
   const menuItems = [
     { to: "/student", label: "Home", icon: <FaHome /> },
     { to: "student-profile", label: "Profile", icon: <FaUser /> },
-    { to: "student-grade", label: "Grades", icon: <FaGraduationCap /> },
-    { to: "student-courses", label: "View Courses", icon: <FaBook /> },
+    { to: "student-grade", label: "View Courses", icon:  <FaBook />},
+    { to: "student-courses", label: "Grade", icon:  <FaGraduationCap />},
     { to: "take-exam", label: "Take Exam", icon: <FaPen /> },
     { to: "exam-results", label: "View Exam Result", icon: <FaFileAlt /> },
     { to: "dormitory", label: "View Dormitory", icon: <FaHome /> },
