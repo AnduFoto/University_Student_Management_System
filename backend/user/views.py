@@ -11,6 +11,7 @@ from rest_framework import status
 from .serializers import UsersAuthsSerializer
 from rest_framework import generics
 from rest_framework import viewsets
+from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -96,8 +97,6 @@ class ChangePasswordView(UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Password updated successfully"}, status=status.HTTP_200_OK)
-    
-    ######################################Display all view###############################
 
 
 class UsersListView(generics.ListAPIView):
@@ -106,6 +105,13 @@ class UsersListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        
+        # Add role filter
+        role = self.request.query_params.get('role', None)
+        if role:
+            queryset = queryset.filter(role=role)
+        
+        # Keep your existing search functionality
         search = self.request.query_params.get('search', None)
         if search:
             queryset = queryset.filter(
@@ -113,6 +119,7 @@ class UsersListView(generics.ListAPIView):
                 Q(firstName__icontains=search) |
                 Q(phoneNumber__icontains=search)
             )
+        
         return queryset
 
 

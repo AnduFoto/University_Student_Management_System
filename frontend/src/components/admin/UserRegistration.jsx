@@ -422,7 +422,7 @@ const UserRegistrationDashboard = () => {
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
-                          <option value="Other">Other</option>
+                          {/* <option value="Other">Other</option> */}
                         </select>
                         {errors[field] && <p className="mt-1 text-sm text-red-500 flex items-center"><ExclamationCircleIcon className="h-4 w-4 mr-1" /> {errors[field]}</p>}
                       </div>
@@ -491,7 +491,7 @@ const UserRegistrationDashboard = () => {
                     onChange={handleChange}
                     className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition"
                   >
-                    {["student","registeral","teacher","department Head","college Head","president","admin"].map((r) => (
+                    {["student","registeral","teacher","department Head","collage","president","admin"].map((r) => (
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
@@ -632,7 +632,7 @@ const UserRegistrationDashboard = () => {
           <div className="flex justify-between mt-8">
             {activeTab !== "personal" && (
               <button
-                type="button"
+             
                 onClick={() => handleTabChange(tabs[tabs.findIndex(tab => tab.id === activeTab) - 1].id)}
                 className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-xl font-medium hover:bg-gray-700 transition shadow-md"
               >
@@ -643,28 +643,28 @@ const UserRegistrationDashboard = () => {
             
             {activeTab !== "account" ? (
               <button
-                type="button"
+                
                 onClick={() => handleTabChange(tabs[tabs.findIndex(tab => tab.id === activeTab) + 1].id)}
-                className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition shadow-md ml-auto"
+                className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 transition shadow-md ml-auto"
               >
                 Next
                 <ArrowRightIcon className="h-5 w-5 ml-2" />
               </button>
             ) : (
               <button
-                type="submit"
+                
                 disabled={loading || !allTabsCompleted}
                 className={`flex items-center px-8 py-3 rounded-xl font-bold text-white shadow-lg transform transition ml-auto ${
                   loading 
                     ? "bg-gray-400 cursor-not-allowed" 
                     : !allTabsCompleted
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 hover:scale-105"
+                    : "bg-orange-600 hover:bg-orange-700 hover:scale-105"
                 }`}
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    <div className="bg-orange-500 animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Registering...
                   </>
                 ) : (

@@ -25,8 +25,8 @@ urlpatterns = [
     path('api/collages/', include('collages.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/students/', include('student.urls')),
-    # path("api/", include("courses.urls")), 
-    # path('api/', include('collages.urls')), 
+    path('api/teachers/', include('teacher.urls')),
+   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

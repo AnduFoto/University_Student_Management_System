@@ -179,7 +179,7 @@ const UserManagementDashboard = () => {
       theme: 'grid',
       styles: { fontSize: 9, cellPadding: 2 },
       headStyles: { 
-        fillColor: [66, 135, 245],
+        fillColor: [140, 140, 140],
         textColor: [255, 255, 255],
         fontStyle: 'bold'
       },
@@ -380,7 +380,7 @@ const UserManagementDashboard = () => {
                 </button>
                 <button
                   onClick={exportToPDF}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
                 >
                   <DocumentArrowDownIcon className="h-4 w-4" />
                   <span>Export PDF</span>
@@ -402,7 +402,7 @@ const UserManagementDashboard = () => {
                 <select
                   value={itemsPerPage}
                   onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                  className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="5">5</option>
                   <option value="10">10</option>
@@ -432,10 +432,10 @@ const UserManagementDashboard = () => {
                       </th>
                     )}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      Phone
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      Status
                     </th>
                   </tr>
                 </thead>
@@ -485,7 +485,9 @@ const UserManagementDashboard = () => {
                               {user.batch}
                             </span>
                           </td>
-                        )}
+                        )}<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {user.phoneNumber}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user.is_active 
@@ -495,12 +497,7 @@ const UserManagementDashboard = () => {
                             {user.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center space-x-1">
-                            <EyeIcon className="h-4 w-4" />
-                            <span>View</span>
-                          </button>
-                        </td>
+                        
                       </tr>
                     ))
                   ) : (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -11,7 +12,10 @@ import {
   FunnelIcon,
   XMarkIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 
 const UsersManagement = () => {
@@ -32,8 +36,7 @@ const UsersManagement = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(8);
-
-  
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
 
   // Auto-hide messages after 5 seconds
   useEffect(() => {
@@ -108,8 +111,6 @@ const UsersManagement = () => {
 
   // Handle user deletion
   const handleDelete = async (username) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-
     try {
       const token = localStorage.getItem('access');
       await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/users/${username}/`, {
@@ -119,6 +120,7 @@ const UsersManagement = () => {
       });
       
       setMessage('User deleted successfully!');
+      setDeleteModal({ isOpen: false, user: null });
       fetchUsers(); // Refresh the list
     } catch (err) {
       console.error('Error deleting user:', err);
@@ -245,9 +247,44 @@ const UsersManagement = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Delete Confirmation Modal
+  const DeleteConfirmationModal = () => {
+    if (!deleteModal.isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-95 animate-in fade-in-90 zoom-in-90">
+          <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+            <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+          </div>
+          
+          <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Delete User</h3>
+          <p className="text-gray-600 text-center mb-6">
+            Are you sure you want to delete <span className="font-semibold">{deleteModal.user?.firstName} {deleteModal.user?.fatherName}</span>? This action cannot be undone.
+          </p>
+          
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setDeleteModal({ isOpen: false, user: null })}
+              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleDelete(deleteModal.user.username)}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md hover:shadow-lg"
+            >
+              Delete User
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Render user list view
   const renderUserList = () => (
-    <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
@@ -256,14 +293,18 @@ const UsersManagement = () => {
         <div className="flex space-x-3 mt-4 sm:mt-0">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-4 py-2 rounded-lg flex items-center transition-all ${showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`px-4 py-2 rounded-xl flex items-center transition-all ${
+              showFilters 
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
           >
             <FunnelIcon className="h-5 w-5 mr-2" />
             Filters
           </button>
           <button
             onClick={fetchUsers}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center transition-all"
+            className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 flex items-center transition-all shadow-sm hover:shadow-md"
           >
             <ArrowPathIcon className="h-5 w-5 mr-2" />
             Refresh
@@ -280,26 +321,26 @@ const UsersManagement = () => {
             placeholder="Search users by name, username, or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full transition-all bg-gray-50"
+            className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full transition-all bg-gray-50"
           />
         </div>
 
         {showFilters && (
-          <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl mb-4 border border-gray-200 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
                 <select
                   value={filters.role}
                   onChange={(e) => setFilters({...filters, role: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="">All Roles</option>
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
                   <option value="registeral">Registeral</option>
                   <option value="department Head">Department Head</option>
-                  <option value="college Head">College Head</option>
+                  <option value="college">College Head</option>
                   <option value="president">President</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -310,7 +351,7 @@ const UsersManagement = () => {
                 <select
                   value={filters.gender}
                   onChange={(e) => setFilters({...filters, gender: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="">All Genders</option>
                   <option value="Male">Male</option>
@@ -324,7 +365,7 @@ const UsersManagement = () => {
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters({...filters, category: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="">All Categories</option>
                   <option value="Natural Science">Natural Science</option>
@@ -335,7 +376,7 @@ const UsersManagement = () => {
             </div>
             <button
               onClick={resetFilters}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+              className="text-sm text-blue-600 hover:text-blue-800 flex items-center transition-colors font-medium"
             >
               <XMarkIcon className="h-4 w-4 mr-1" />
               Clear all filters
@@ -346,50 +387,50 @@ const UsersManagement = () => {
 
       {/* Users Table */}
       {loading ? (
-        <div className="text-center py-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-3 text-gray-600">Loading users...</p>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading users...</p>
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
-          <UserIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="text-lg font-medium">No users found</p>
+        <div className="text-center py-12 text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+          <UserIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+          <p className="text-lg font-medium text-gray-600">No users found</p>
           <p className="text-sm mt-1">
             {searchTerm || filters.role || filters.gender || filters.category 
               ? "Try adjusting your search or filters" 
-              : "No users available"}
+              : "No users available in the system"}
           </p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User ID</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Gender</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentUsers.map((user) => (
-                  <tr key={user.username} className="hover:bg-gray-50 transition-colors">
+                  <tr key={user.username} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
+                        <div className="flex-shrink-0 h-12 w-12">
                           {user.picture ? (
-                            <img className="h-10 w-10 rounded-full object-cover" src={user.picture} alt={user.firstName} />
+                            <img className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm" src={user.picture} alt={user.firstName} />
                           ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-2 border-white shadow-sm">
                               <UserIcon className="h-6 w-6 text-blue-600" />
                             </div>
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-semibold text-gray-900">
                             {user.firstName} {user.fatherName}
                           </div>
                           <div className="text-sm text-gray-500">{user.username}</div>
@@ -397,10 +438,10 @@ const UsersManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 font-mono">{user.userId}</div>
+                      <div className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded-md inline-block">{user.userId}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
+                      <span className="px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
                         {user.role}
                       </span>
                     </td>
@@ -408,34 +449,38 @@ const UsersManagement = () => {
                       {user.gender}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      <span className={`px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full ${
+                        user.is_active 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
                       }`}>
                         {user.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => viewUser(user)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors flex items-center p-1 rounded hover:bg-blue-50"
-                        title="View details"
-                      >
-                        <EyeIcon className="h-4 w-4 mr-1" /> View
-                      </button>
-                      <button
-                        onClick={() => editUser(user)}
-                        className="text-indigo-600 hover:text-indigo-900 transition-colors flex items-center p-1 rounded hover:bg-indigo-50"
-                        title="Edit user"
-                      >
-                        <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.username)}
-                        className="text-red-600 hover:text-red-900 transition-colors flex items-center p-1 rounded hover:bg-red-50"
-                        title="Delete user"
-                      >
-                        <TrashIcon className="h-4 w-4 mr-1" /> Delete
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => viewUser(user)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 rounded-lg hover:bg-blue-50 flex items-center"
+                          title="View details"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => editUser(user)}
+                          className="text-indigo-600 hover:text-indigo-800 transition-colors p-2 rounded-lg hover:bg-indigo-50 flex items-center"
+                          title="Edit user"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteModal({ isOpen: true, user })}
+                          className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-lg hover:bg-red-50 flex items-center"
+                          title="Delete user"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -445,8 +490,8 @@ const UsersManagement = () => {
           
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 px-2">
-              <div className="text-sm text-gray-700">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 px-2 space-y-4 sm:space-y-0">
+              <div className="text-sm text-gray-600">
                 Showing <span className="font-medium">{indexOfFirstUser + 1}</span> to{' '}
                 <span className="font-medium">
                   {indexOfLastUser > filteredUsers.length ? filteredUsers.length : indexOfLastUser}
@@ -457,7 +502,7 @@ const UsersManagement = () => {
                 <button
                   onClick={() => paginate(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center"
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-sm"
                 >
                   <ChevronLeftIcon className="h-4 w-4 mr-1" /> Previous
                 </button>
@@ -466,10 +511,10 @@ const UsersManagement = () => {
                     <button
                       key={number}
                       onClick={() => paginate(number)}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ${
                         currentPage === number
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       {number}
@@ -479,7 +524,7 @@ const UsersManagement = () => {
                 <button
                   onClick={() => paginate(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center"
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-sm"
                 >
                   Next <ChevronRightIcon className="h-4 w-4 ml-1" />
                 </button>
@@ -493,7 +538,7 @@ const UsersManagement = () => {
 
   // Render user detail view
   const renderUserView = () => (
-    <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <div className="flex items-center mb-6">
         <button 
           onClick={() => setViewMode('list')}
@@ -507,7 +552,7 @@ const UsersManagement = () => {
       {selectedUser && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl text-center border border-gray-200">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl text-center border border-gray-200 shadow-sm">
               {selectedUser.picture ? (
                 <img className="h-32 w-32 rounded-full mx-auto object-cover mb-4 border-4 border-white shadow-md" src={selectedUser.picture} alt={selectedUser.firstName} />
               ) : (
@@ -522,7 +567,7 @@ const UsersManagement = () => {
               <p className="text-sm text-gray-500 mt-1 font-mono">{selectedUser.userId}</p>
               
               <div className="mt-4">
-                <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
+                <span className={`px-3 py-1.5 inline-flex text-sm leading-4 font-semibold rounded-full ${
                   selectedUser.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
                   {selectedUser.is_active ? 'Active' : 'Inactive'}
@@ -531,7 +576,7 @@ const UsersManagement = () => {
               
               <button
                 onClick={() => editUser(selectedUser)}
-                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center"
+                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center"
               >
                 <PencilIcon className="h-4 w-4 mr-2" /> Edit User
               </button>
@@ -540,7 +585,7 @@ const UsersManagement = () => {
           
           <div className="md:col-span-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
                 <h4 className="font-semibold text-gray-700 mb-3 text-lg">Personal Information</h4>
                 <dl className="space-y-3">
                   <div>
@@ -566,7 +611,7 @@ const UsersManagement = () => {
                 </dl>
               </div>
               
-              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
                 <h4 className="font-semibold text-gray-700 mb-3 text-lg">Account Information</h4>
                 <dl className="space-y-3">
                   <div>
@@ -594,7 +639,7 @@ const UsersManagement = () => {
                 </dl>
               </div>
               
-              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200 md:col-span-2">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm md:col-span-2">
                 <h4 className="font-semibold text-gray-700 mb-3 text-lg">Address Information</h4>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -632,7 +677,7 @@ const UsersManagement = () => {
 
   // Render user edit form
   const renderUserEdit = () => (
-    <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <div className="flex items-center mb-6">
         <button 
           onClick={() => setViewMode('list')}
@@ -656,7 +701,7 @@ const UsersManagement = () => {
                 value={selectedUser.firstName || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, firstName: e.target.value})}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
             
@@ -667,7 +712,7 @@ const UsersManagement = () => {
                 value={selectedUser.fatherName || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, fatherName: e.target.value})}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
             
@@ -677,7 +722,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.grandFatherName || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, grandFatherName: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
             
@@ -687,7 +732,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.motherName || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, motherName: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
             
@@ -697,7 +742,7 @@ const UsersManagement = () => {
                 type="tel"
                 value={selectedUser.phoneNumber || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, phoneNumber: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
             
@@ -707,7 +752,7 @@ const UsersManagement = () => {
                 value={selectedUser.gender || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, gender: e.target.value})}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -721,7 +766,7 @@ const UsersManagement = () => {
                 value={selectedUser.role || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
                 required
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -738,7 +783,7 @@ const UsersManagement = () => {
               <select
                 value={selectedUser.catagory || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, catagory: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               >
                 <option value="">Select Category</option>
                 <option value="Natural Science">Natural Science</option>
@@ -752,7 +797,7 @@ const UsersManagement = () => {
               <select
                 value={selectedUser.is_active ? 'true' : 'false'}
                 onChange={(e) => setSelectedUser({...selectedUser, is_active: e.target.value === 'true'})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               >
                 <option value="true">Active</option>
                 <option value="false">Inactive</option>
@@ -765,7 +810,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.region || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, region: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
 
@@ -775,10 +820,9 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.zone_or_special_wereda || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, zone_or_special_wereda: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
-
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">City/Town</label>
@@ -786,7 +830,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.city_or_town || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, city_or_town: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
 
@@ -796,7 +840,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.house_number || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, house_number: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
 
@@ -806,7 +850,7 @@ const UsersManagement = () => {
                 type="text"
                 value={selectedUser.religion || ''}
                 onChange={(e) => setSelectedUser({...selectedUser, religion: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               />
             </div>
 
@@ -815,7 +859,7 @@ const UsersManagement = () => {
               <select
                 value={selectedUser.handicap || 'normal'}
                 onChange={(e) => setSelectedUser({...selectedUser, handicap: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
               >
                 <option value="normal">Normal</option>
                 <option value="case">Case</option>
@@ -827,16 +871,14 @@ const UsersManagement = () => {
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
             >
               Cancel
             </button>
-            <div className=''>
-
-                <button
-              
+            <button
+              type="submit"
               disabled={isUpdating}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center"
+              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 disabled:opacity-50 transition-all font-medium shadow-md hover:shadow-lg flex items-center"
             >
               {isUpdating ? (
                 <>
@@ -847,8 +889,6 @@ const UsersManagement = () => {
                 'Update User'
               )}
             </button>
-            </div>
-            
           </div>
         </form>
       )}
@@ -856,11 +896,11 @@ const UsersManagement = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 lg:p-6">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+          <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg">
             <UserIcon className="h-10 w-10 text-white" />
           </div>
         </div>
@@ -872,32 +912,16 @@ const UsersManagement = () => {
 
       {/* Alert Messages */}
       {message && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2 a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{message}</p>
-            </div>
-          </div>
+        <div className="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-xl flex items-center">
+          <CheckCircleIcon className="h-5 w-5 mr-2" />
+          <p className="font-medium">{message}</p>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="CurrentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          </div>
+        <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl flex items-center">
+          <XCircleIcon className="h-5 w-5 mr-2" />
+          <p className="font-medium">{error}</p>
         </div>
       )}
 
@@ -907,10 +931,11 @@ const UsersManagement = () => {
         {viewMode === 'view' && renderUserView()}
         {viewMode === 'edit' && renderUserEdit()}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal />
     </div>
   );
 };
 
 export default UsersManagement;
-
-                    

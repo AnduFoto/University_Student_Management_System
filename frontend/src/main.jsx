@@ -38,6 +38,13 @@ import RegularRegistration from './components/registeral/RegularRegistration.jsx
 import RegisteredStudent from './components/registeral/RegisteredStudent.jsx'
 import UserManagement from './components/admin/UserManagement.jsx'
 import UserPasswordReset from './components/admin/UserPasswordReset.jsx'
+import CollageDashboard from './components/collages/CollageDashboard.jsx'
+import TeacherRegistration from './components/collages/TeacherRegistration.jsx';
+import RegisteredTeacher from './components/collages/RegisteredTeacher.jsx'
+import TeacherDashboard from './components/teachers/TeacherDashboard.jsx';
+import TeacherInfo from './components/teachers/TeacherInfo.jsx'
+import AssignedTeachers from './components/collages/AssignedTeachers.jsx'
+import AllTeacher from './components/collages/AllTeacher.jsx'
 
 const router=createBrowserRouter([
 
@@ -204,7 +211,7 @@ const router=createBrowserRouter([
             },
             {
               path:'departments-list',
-              element:<DepartmentList/>
+              element:<RegisteredStudent/>
             },
             {
               path:'users-list',
@@ -241,69 +248,56 @@ const router=createBrowserRouter([
           ]
         },
         ],
-    },]},
+    },
+  
+  {
+    element: <PrivateRoute allowedRoles={["collage"]} />,
+        children: [
+              {
+          path:'collagedashboard',
+          element:<CollageDashboard/>,
+          children:[
+            {
+             path:'teacher-registration',
+             element:<TeacherRegistration/>
+            },
+            {
+              path:'teacher',
+              element:<RegisteredTeacher/>
+            },
+            {
+              path:'assigned-teacher',
+              element:<AssignedTeachers/>
+            },
+            {
+              path:'all-teachers',
+              element:<AllTeacher/>
+            }
+          ]
+        },
+        ],
+  },
 
-  // {
-  //   path:'/',
-  //   element:<Root/>,
-  //   children:[
-  //     {
-  //       index:true,
-  //       element:<App/>
-  //     },
-    
-  //   ]
-  // },
-  //   {
-  //       path:'login',
-  //       element:<Login/>
-  //     },
-    
-  //   {
-  //     path:'student',
-  //     element:<Student/>,
-  //   },
-   
-  //     {
-  //         path:'studentdashboard',
-  //         element:<Dashboard/>,
-  //         children:[
-  //           {
-  //         path:'student-profile',
-  //         element:<StudentProfile/>
-  //         },
-  //         {
-  //         path:'student-grade',
-  //         element:<Mainbar/>
-  //         },
-  //         ]
-  //       },
-
-  //       {
-  //         path:'registeraldashboard',
-  //         element:<Registeraldashboard/>,
-  //         children:[
-  //           {
-  //             path:'registration',
-  //             element:<Registration/>
-  //           }
-  //         ]
-  //       },
-        // {
-        //   path:'change-password',
-        //   element:<Changepassword/>
-        // },
-
-        // {
-        //   path:'admindashboard',
-        //   element:<AdminDashboard/>
-        // },
-
-        // {
-        //   path:'departmentdashboard',
-        //   element:<DepartmentDashboard/>
-        // }
-
+   {
+    element: <PrivateRoute allowedRoles={["teacher"]} />,
+        children: [
+              {
+          path:'teacherdashboard',
+          element:<TeacherDashboard/>,
+          children:[
+            {
+             path:'course',
+             element:<TeacherInfo/>
+            },
+            {
+              path:'teacher',
+              element:<RegisteredTeacher/>
+            }
+          ]
+        },
+        ],
+  },
+  ]},
 
 
 ])

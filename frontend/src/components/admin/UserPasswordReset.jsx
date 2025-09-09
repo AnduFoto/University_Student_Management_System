@@ -190,11 +190,7 @@ export default function PasswordResetPage() {
                   }}
                 />
               ) : null}
-              {/* <div className="w-20 h-20 rounded-full mr-4 bg-blue-100 flex items-center justify-center border border-gray-300">
-                <span className="text-blue-600 font-medium text-2xl">
-                  {user.firstName?.charAt(0) || 'U'}
-                </span>
-              </div> */}
+            
               <div>
                 <p className="text-lg font-semibold text-gray-800">
                   {user.firstName} {user.fatherName} {user.grandFatherName}

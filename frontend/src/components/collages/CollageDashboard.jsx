@@ -1,102 +1,119 @@
-import { useState } from "react";
-import portfolioabout from "../../assets/portfolioabout.png";
-import Navbar from "../comman/Navbar";
-import { Link, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { 
+  FaUserCircle, 
+  FaRegIdBadge, 
+  FaUserEdit, 
+  FaUsers, 
+  FaLayerGroup 
+} from "react-icons/fa";
+import CollegeNavbar from "./CollegeNavbar.jsx";
 
 const Registeraldashboard = () => {
   const [showSidebar, setShowSidebar] = useState(true);
+  const [user, setUser] = useState(null);
+  const location = useLocation();
 
-  const inputClass =
-    "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    if (window.innerWidth < 768) setShowSidebar(false);
+  }, []);
+
+  const tabsside = [
+    { name: "Register Instructor", label: "Register Instructor", link: "teacher-registration", icon: <FaRegIdBadge /> },
+    { name: "Assign Instructor", label: "Assign Instructor", link: "teacher", icon: <FaUserEdit /> },
+    { name: "Assigned Instructor", label: "Assigned Instructor", link: "assigned-teacher", icon: <FaUsers /> },
+    { name: "All Instructors", label: "All Instructors", link: "all-teachers", icon: <FaLayerGroup /> },
+  ];
 
   return (
     <div className="h-screen w-full bg-gray-100 overflow-hidden">
-      <Navbar />
+      <CollegeNavbar />
       <div className="flex h-[calc(100vh-4rem)] mt-16 relative">
         {/* Sidebar */}
-        {showSidebar && (
-          <div className="w-full sm:w-1/3 md:w-1/4 bg-white border-r border-gray-200 p-4 flex flex-col items-center relative h-full overflow-y-auto">
-            {/* Hide Sidebar Button */}
-            <button
-              onClick={() => setShowSidebar(false)}
-              className="absolute top-4 right-3 z-10 bg-gray-600 rounded-full w-11 h-9 text-white flex items-center justify-center text-lg font-bold hover:bg-gray-400 transition"
-              title="Hide sidebar"
-            >
-              ←
-            </button>
-
-            {/* Profile Section */}
-            <img
-              src={portfolioabout}
-              alt="Profile"
-              className="rounded-full w-24 h-24 mb-2"
-            />
-            <div className="text-center">
-              <p className="font-semibold">Andualem Lafebo</p>
-              <p className="text-sm text-gray-500">Collage</p>
-            </div>
-
-            <div className="flex gap-2 mt-4">
-         
-            </div>
-
-            <button className="mt-4 bg-gray-200 text-black px-4 py-2 rounded">
-             View Ditails
-            </button>
-
-            {/* Contact & Info */}
-  
-
-            {/* Form Section */}
-            <div className="mt-6 w-full space-y-4 text-sm">
-              <div>
-                <label>First Name*</label>
-                <input type="text" className={inputClass} defaultValue="Julie" />
-              </div>
-              <div>
-                <label>Last Name*</label>
-                <input type="text" className={inputClass} defaultValue="Beatson" />
-              </div>
-              <div>
-                <label>Email*</label>
-                <input
-                  type="email"
-                  className={inputClass}
-                  defaultValue="brian@reachboarding.com"
+        <div
+          className={`bg-gradient-to-b from-slate-500 to-slate-700 text-white shadow-lg h-full flex flex-col justify-between fixed top-15 left-0 transition-transform duration-300 ease-in-out z-20 ${
+            showSidebar ? "translate-x-0 w-72" : "-translate-x-full w-72"
+          }`}
+        >
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Profile */}
+            <div className="flex flex-col items-center p-6 border-b border-orange-300 relative flex-shrink-0">
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="absolute top-6 right-3 bg-white text-orange-500 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition"
+                title="Hide sidebar"
+              >
+                ←
+              </button>
+              {user?.picture ? (
+                <img
+                  src={`http://127.0.0.1:8000${user.picture}`}
+                  alt={user.name || "User"}
+                  className="w-24 h-24 object-cover border-2 border-black shadow-lg"
                 />
-              </div>
-              <div>
-                <label>Mobile*</label>
-                <input type="text" className={inputClass} defaultValue="0466 999 405" />
-              </div>
-              <div>
-                <label>DOB</label>
-                <input type="date" className={inputClass} defaultValue="2004-05-01" />
-              </div>
-              <div>
-                <label>Gender</label>
-                <select className={inputClass}>
-                  <option>Female</option>
-                  <option>Male</option>
-                </select>
-              </div>
-              <div>
-                <label>Deleted</label>
-                <select className={inputClass}>
-                  <option>No</option>
-                  <option>Yes</option>
-                </select>
-              </div>
+              ) : (
+                <FaUserCircle className="text-3xl sm:text-4xl text-black" />
+              )}
+              <p className="font-bold text-lg mt-2">
+                {user?.firstName || "User"} {user?.fatherName || ""}
+              </p>
+              <span className="text-xs bg-white text-orange-500 px-3 py-1 rounded-full font-semibold shadow">
+                {user?.role || "Role"}
+              </span>
             </div>
-          </div>
-        )}
 
-        {/* Show Button if Sidebar is Hidden */}
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-400 scrollbar-track-orange-200 p-4">
+              {tabsside.map((tab) => {
+                const path = location.pathname.replace(/\/$/, ""); // remove trailing slash
+                const tabPath = `/${tab.link}`;
+                const isActive = path === tabPath || path.endsWith(`/${tab.link}`);
+
+                return (
+                  <Link
+                    key={tab.name}
+                    to={tab.link}
+                    onClick={() => {
+                      if (window.innerWidth < 768) setShowSidebar(false);
+                    }}
+                  >
+                    <div
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer mb-2 transition-all duration-200 ${
+                        isActive
+                          ? "bg-white text-orange-600 shadow-md"
+                          : "hover:bg-orange-400 hover:shadow-md"
+                      }`}
+                    >
+                      <span className="text-lg">{tab.icon}</span>
+                      <span className="font-medium">{tab.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Footer */}
+          <div className="p-6 border-t border-orange-300 flex flex-col gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3">
+          
+              <div></div>
+            </div>
+            <button className="flex items-center gap-2 text-red-200 hover:text-red-100 mt-2 font-medium">
+              {/* Add logout action if needed */}
+            </button>
+          </div>
+        </div>
+
+        {/* Sidebar toggle */}
         {!showSidebar && (
-          <div className="absolute top-0 left-2 z-10">
+          <div className="absolute top-6 left-2 z-30">
             <button
               onClick={() => setShowSidebar(true)}
-              className="bg-gray-800 text-white rounded-full w-12 h-7 flex items-center justify-center text-lg font-bold hover:bg-gray-600 transition"
+              className="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-orange-600 shadow-lg transition"
               title="Show sidebar"
             >
               →
@@ -105,29 +122,11 @@ const Registeraldashboard = () => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 bg-white h-full px-8 overflow-y-auto py-6">
-          <div className="text-lg font-semibold text-gray-700 mb-4 p-4 bg-gray-200 flex items-center justify-center">
-           Collage
-          </div>
-
-          <hr />
-
-          {/* Tabs */}
-          <div className="border-b border-gray-200 mb-4 p-4">
-            <div className="flex text-sm font-medium overflow-x-auto whitespace-nowrap gap-4">
-              <Link to="registration">
-                <button className="pb-2 border-b-2 border-blue-500">Registration</button>
-              </Link>
-              <button className="border border-gray-200 px-3 py-2">Address</button>
-              <button className="border border-gray-200 px-3 py-2">Security</button>
-              <button className="border border-gray-200 px-3 py-2">Metadata</button>
-              <button className="border border-gray-200 px-3 py-2">Associations</button>
-              <button className="border border-gray-200 px-3 py-2">Groups</button>
-              <button className="border border-gray-200 px-3 py-2">Identifiers</button>
-              <button className="border border-gray-200 px-3 py-2">Medical</button>
-            </div>
-          </div>
-
+        <div
+          className={`flex-1 bg-white h-full px-4 sm:px-6 md:px-10 lg:px-16 overflow-y-auto py-8 transition-all duration-300 ${
+            showSidebar ? "md:ml-72" : "ml-0"
+          }`}
+        >
           <Outlet />
         </div>
       </div>

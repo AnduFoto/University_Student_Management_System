@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
   MagnifyingGlassIcon,
@@ -29,6 +30,7 @@ const StudentManagement = () => {
   const [deptSearch, setDeptSearch] = useState("");
   const [viewingStudent, setViewingStudent] = useState(null);
   const [accordionOpen, setAccordionOpen] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // New loading state
 
   const BASE_URL = "http://localhost:8000/api";
   const token = localStorage.getItem("access");
@@ -36,14 +38,15 @@ const StudentManagement = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true); // Start loading
         const [studentsRes, departmentsRes, usersRes] = await Promise.all([
-          axios.get(`${BASE_URL}/students/`, {
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/students/`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${BASE_URL}/collages/departments/`, {
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/collages/departments/`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${BASE_URL}/users/`, {
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -52,6 +55,8 @@ const StudentManagement = () => {
         setUsers(usersRes.data.results || usersRes.data);
       } catch (err) {
         console.error("Failed to fetch data:", err);
+      } finally {
+        setIsLoading(false); // Stop loading regardless of success or error
       }
     };
     fetchData();
@@ -234,8 +239,18 @@ const StudentManagement = () => {
         <p className="text-gray-600 mt-2">View and manage student registrations</p>
       </div>
 
+      {/* Loading spinner */}
+{isLoading && (
+  <div className="flex flex-col justify-center items-center h-96">
+    <div className="relative">
+      <div className="w-16 h-16 border-4 border-blue-200 rounded-full"></div>
+      <div className="w-16 h-16 border-4 border-t-transparent border-gradient-to-r from-blue-500 to-indigo-600 rounded-full animate-spin absolute top-0 left-0"></div>
+    </div>
+    <p className="mt-6 text-lg font-medium text-gray-700">Loading Departments</p>
+  </div>
+)}
       {/* Department selection */}
-      {!activeDepartment ? (
+      {!isLoading && !activeDepartment ? (
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <div className="flex items-center mb-6">
@@ -283,7 +298,7 @@ const StudentManagement = () => {
             </div>
           </div>
         </div>
-      ) : !selectedBatch ? (
+      ) : !isLoading && !selectedBatch ? (
         // Batch selection
         <div className="bg-white rounded-2xl shadow-lg p-6 max-w-xl mx-auto">
           <button
@@ -327,7 +342,7 @@ const StudentManagement = () => {
             </div>
           )}
         </div>
-      ) : !selectedSemester ? (
+      ) : !isLoading && !selectedSemester ? (
         // Semester selection
         <div className="bg-white rounded-2xl shadow-lg p-6 max-w-xl mx-auto">
           <button
@@ -373,7 +388,7 @@ const StudentManagement = () => {
                     <div className="p-4 bg-blue-50 flex justify-center">
                       <button
                         onClick={() => setSelectedSemester(sem)}
-                        className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition shadow-md"
+                        className="px-6 py-2 bg-gradient-to-r from-orange-600 to-orange-600 text-white rounded-lg hover:from-orange-700 hover:to-orange-700 transition shadow-md"
                       >
                         Select {sem}
                       </button>
@@ -384,7 +399,7 @@ const StudentManagement = () => {
             </div>
           )}
         </div>
-      ) : (
+      ) : !isLoading ? (
         // Student table
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-6">
@@ -463,7 +478,7 @@ const StudentManagement = () => {
                     <React.Fragment key={s.username}>
                       <tr className="hover:bg-gray-50 transition">
                         <td className="px-6 py-4 font-medium text-gray-900">
-                          {s.user_details?.firstName} {s.user_details?.fatherName}
+                          {s.user_details?.firstName} {s.user_details?.fatherName} {s.user_details?.grandFatherName}
                         </td>
                         <td className="px-6 py-4 text-gray-700">{s.username}</td>
                         <td className="px-6 py-4">
@@ -478,7 +493,7 @@ const StudentManagement = () => {
                                 viewingStudent === s.username ? null : s.username
                               )
                             }
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-1.5 rounded-lg text-white hover:from-blue-700 hover:to-indigo-700 transition flex items-center gap-1 shadow-sm"
+                            className="bg-gradient-to-r from-orange-600 to-orange-600 px-3 py-1.5 rounded-lg text-white hover:from-orange-700 hover:to-orange-700 transition flex items-center gap-1 shadow-sm"
                           >
                             <EyeIcon className="h-4 w-4" /> Details
                           </button>
@@ -510,7 +525,7 @@ const StudentManagement = () => {
                                   <strong className="text-gray-700">Username:</strong> {s.username}
                                 </div>
                                 <div className="bg-gray-50 p-3 rounded-lg">
-                                  <strong className="text-gray-700">Name:</strong> {s.user_details?.firstName} {s.user_details?.fatherName}
+                                  <strong className="text-gray-700">Name:</strong> {s.user_details?.firstName} {s.user_details?.fatherName} {s.user_details?.grandFatherName}
                                 </div>
                                 <div className="bg-gray-50 p-3 rounded-lg">
                                   <strong className="text-gray-700">Batch:</strong> {selectedBatch}
@@ -547,7 +562,7 @@ const StudentManagement = () => {
             </table>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
-import RegisteralNavbar from './RegisteralNavbar'
+import RegisteralNavbar from './RegisteralNavbar';
 import {
   FaRegIdBadge,
   FaUserEdit,
@@ -29,7 +29,7 @@ const Registeraldashboard = () => {
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  // close dropdown when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -41,12 +41,10 @@ const Registeraldashboard = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // update dropdown position relative to button
+  // Update dropdown position relative to button
   useEffect(() => {
     if (showDropdown && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -82,11 +80,12 @@ const Registeraldashboard = () => {
   return (
     <div className="h-screen w-full bg-gray-100 overflow-hidden">
       <RegisteralNavbar />
+
       <div className="flex h-[calc(100vh-4rem)] mt-16 relative">
-        
+
         {/* Sidebar */}
         <div
-          className={`bg-gradient-to-b from-slate-500 to-slate-700 text-white shadow-lg h-full flex flex-col justify-between fixed top-20 left-0 transition-transform duration-300 ease-in-out z-20 ${
+          className={`bg-gradient-to-b from-slate-500 to-slate-700 text-white shadow-lg h-full flex flex-col justify-between fixed top-16 left-0 transition-transform duration-300 ease-in-out z-20 ${
             showSidebar ? "translate-x-0 w-72" : "-translate-x-full w-72"
           }`}
         >
@@ -104,14 +103,13 @@ const Registeraldashboard = () => {
                 <img
                   src={`http://127.0.0.1:8000${user.picture}`}
                   alt={user.name || "User"}
-                  className="w-24 h-24 object-cover border-2 border-black shadow-lg"
+                  className="w-24 h-24 object-cover mt-6 border-2 border-black shadow-lg"
                 />
               ) : (
                 <FaUserCircle className="text-3xl sm:text-4xl text-black" />
               )}
               <p className="font-bold text-lg mt-2">
-                {user?.firstName || "User"}{" "}
-                {user?.fatherName}
+                {user?.firstName || "User"} {user?.fatherName}
               </p>
               <span className="text-xs bg-white text-orange-500 px-3 py-1 rounded-full font-semibold shadow">
                 {user?.role || "Role"}
@@ -122,7 +120,13 @@ const Registeraldashboard = () => {
               {tabsside.map((tab) => {
                 const isActive = location.pathname.includes(tab.link);
                 return (
-                  <Link key={tab.name} to={tab.link}>
+                  <Link
+                    key={tab.name}
+                    to={tab.link}
+                    onClick={() => {
+                      if (window.innerWidth < 768) setShowSidebar(false);
+                    }}
+                  >
                     <div
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer mb-2 transition-all duration-200 ${
                         isActive
@@ -161,7 +165,7 @@ const Registeraldashboard = () => {
 
         {/* Main Content */}
         <div
-          className={`flex-1 bg-white h-full px-16 overflow-y-auto py-8 transition-all top-2 duration-300 ${
+          className={`flex-1 bg-white h-full px-16 overflow-y-auto py-8 transition-all duration-300 top-2 ${
             showSidebar ? "ml-72" : "ml-0"
           }`}
         >
@@ -186,7 +190,10 @@ const Registeraldashboard = () => {
                 ) : tab.link ? (
                   <Link key={tab.name} to={tab.link}>
                     <button
-                      onClick={() => setActiveTab(tab.name)}
+                      onClick={() => {
+                        setActiveTab(tab.name);
+                        if (window.innerWidth < 768) setShowSidebar(false);
+                      }}
                       className={`px-4 py-2 rounded-full transition-colors duration-200 ${
                         activeTab === tab.name
                           ? "bg-orange-500 text-white shadow"
@@ -234,20 +241,22 @@ const Registeraldashboard = () => {
               onClick={() => {
                 setActiveTab("registration");
                 setShowDropdown(false);
+                if (window.innerWidth < 768) setShowSidebar(false);
               }}
               className="block px-4 py-2 text-gray-700 hover:bg-orange-100"
             >
-              Freshman
+              New Batch
             </Link>
             <Link
               to="registration"
               onClick={() => {
                 setActiveTab("registration");
                 setShowDropdown(false);
+                if (window.innerWidth < 768) setShowSidebar(false);
               }}
               className="block px-4 py-2 text-gray-700 hover:bg-orange-100"
             >
-              Regular
+              Existing Batch
             </Link>
           </div>,
           document.body
@@ -257,5 +266,3 @@ const Registeraldashboard = () => {
 };
 
 export default Registeraldashboard;
-
-

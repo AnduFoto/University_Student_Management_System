@@ -48,6 +48,7 @@ export default function Login() {
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("role", response.data.role);
+      localStorage.setItem('user', JSON.stringify(response.data));
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
       setUsername("");
@@ -59,7 +60,7 @@ export default function Login() {
         registeral: "/registeraldashboard",
         teacher: "/teacherdashboard",
         department: "/departmentdashboard",
-        collage: "/studentdashboard",
+        collage: "/collagedashboard",
         president: "/studentdashboard"
       };
 
