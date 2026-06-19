@@ -30,7 +30,7 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
-            'username', 'department_id', 'course_ids', 'courses',
+            'username','id', 'department_id', 'course_ids', 'courses',
             'year', 'semester', 'course_category'
         ]
 
@@ -99,6 +99,7 @@ class StudentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
+            'id',
             'username',
             'user_details',
             'department_id',
@@ -144,3 +145,13 @@ class StudentDetailSerializer(serializers.ModelSerializer):
                 })
 
         return semester_data
+    
+
+
+
+
+
+
+    ################################################################################
+
+

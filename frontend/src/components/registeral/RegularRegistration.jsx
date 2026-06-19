@@ -1001,17 +1001,7 @@ const StudentRegistration = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <div className="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg">
-            <UserIcon className="h-10 w-10 text-white" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          Student Registration Portal
-        </h1>
-        <p className="text-gray-600">Easily register and manage student academic records</p>
-      </div>
+     
 
       {/* Alert Messages */}
       {message && (

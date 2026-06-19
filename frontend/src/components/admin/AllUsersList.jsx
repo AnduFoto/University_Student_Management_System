@@ -1,485 +1,880 @@
 
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import * as XLSX from 'xlsx';
+// import jsPDF from 'jspdf';
+// import autoTable from 'jspdf-autotable';
+// import {
+//   MagnifyingGlassIcon,
+//   AcademicCapIcon,
+//   UserGroupIcon,
+//   BuildingLibraryIcon,
+//   UserCircleIcon,
+//   CogIcon,
+//   DocumentArrowDownIcon,
+//   ChevronLeftIcon,
+//   ChevronRightIcon,
+//   EyeIcon,
+//   ChartBarIcon,
+//   UsersIcon,
+//   AdjustmentsHorizontalIcon
+// } from '@heroicons/react/24/outline';
+
+// // Main Dashboard Component
+// const UserManagementDashboard = () => {
+//   const [users, setUsers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [activeTab, setActiveTab] = useState('students');
+//   const [selectedBatch, setSelectedBatch] = useState('all');
+//   const [batches, setBatches] = useState([]);
+//   const [searchTerm, setSearchTerm] = useState('');
+  
+//   // Pagination state
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+//   // Stats state
+//   const [stats, setStats] = useState({
+//     total: 0,
+//     students: 0,
+//     teachers: 0,
+//     active: 0
+//   });
+
+//   useEffect(() => {
+//     fetchUsers();
+//   }, []);
+
+//   const fetchUsers = async () => {
+//     try {
+//       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/`);
+      
+//       let usersData = [];
+//       if (Array.isArray(response.data)) {
+//         usersData = response.data;
+//       } else if (response.data && Array.isArray(response.data.results)) {
+//         usersData = response.data.results;
+//       } else if (response.data && Array.isArray(response.data.users)) {
+//         usersData = response.data.users;
+//       } else if (response.data && typeof response.data === 'object') {
+//         usersData = Object.values(response.data);
+//       } else {
+//         console.error('Unexpected API response structure:', response.data);
+//         setError('Unexpected data format received from server');
+//         setLoading(false);
+//         return;
+//       }
+      
+//       setUsers(usersData);
+      
+//       // Extract unique batches
+//       const userBatches = [...new Set(usersData
+//         .filter(user => user.batch)
+//         .map(user => user.batch))];
+//       setBatches(userBatches);
+      
+//       // Calculate statistics
+//       const total = usersData.length;
+//       const students = usersData.filter(user => getUserRole(user).toLowerCase().includes('student')).length;
+//       const teachers = usersData.filter(user => getUserRole(user).toLowerCase().includes('teacher')).length;
+//       const active = usersData.filter(user => user.is_active).length;
+      
+//       setStats({ total, students, teachers, active });
+      
+//       setLoading(false);
+//     } catch (error) {
+//       console.error('Error fetching users:', error);
+//       setError('Failed to fetch users. Please try again later.');
+//       setLoading(false);
+//     }
+//   };
+
+//   const getUserRole = (user) => {
+//     if (user.role) return user.role;
+//     if (user.userType) return user.userType;
+//     if (user.type) return user.type;
+//     if (user.roleName) return user.roleName;
+//     return 'Unknown';
+//   };
+
+//   const filteredUsers = Array.isArray(users) ? users.filter(user => {
+//     const userRole = getUserRole(user).toLowerCase();
+//     const matchesSearch = searchTerm === '' || 
+//       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       user.fatherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       user.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+//     if (activeTab === 'students') {
+//       return userRole.includes('student') && 
+//         (selectedBatch === 'all' || user.batch === selectedBatch) &&
+//         matchesSearch;
+//     } else if (activeTab === 'teachers') {
+//       return userRole.includes('teacher') && matchesSearch;
+//     } else if (activeTab === 'registeral') {
+//       return userRole.includes('registeral') && matchesSearch;
+//     } else if (activeTab === 'department') {
+//       return userRole.includes('department') && matchesSearch;
+//     } else if (activeTab === 'collage') {
+//       return userRole.includes('collage') && matchesSearch;
+//     } else if (activeTab === 'president') {
+//       return userRole.includes('president') && matchesSearch;
+//     } else if (activeTab === 'admin') {
+//       return userRole.includes('admin') && matchesSearch;
+//     }
+//     return false;
+//   }) : [];
+
+//   const indexOfLastItem = currentPage * itemsPerPage;
+//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+//   const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+//   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+//   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+//   const exportToCSV = () => {
+//     const dataToExport = filteredUsers.map(user => ({
+//       'First Name': user.firstName,
+//       'Father Name': user.fatherName,
+//       'Grand Father Name': user.grandFatherName,
+//       'Username': user.username,
+//       'User ID': user.userId,
+//       'Role': getUserRole(user),
+//       'Batch': user.batch || 'N/A',
+//       'Status': user.is_active ? 'Active' : 'Inactive',
+//       'Phone Number': user.phoneNumber || 'N/A',
+//       'Category': user.catagory || 'N/A',
+//       'Gender': user.gender,
+//       'Nationality': user.nationality || 'N/A'
+//     }));
+
+//     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+//     const workbook = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+    
+//     const fileName = `${activeTab}_${selectedBatch === 'all' ? 'all_batches' : 'batch_' + selectedBatch}.xlsx`;
+//     XLSX.writeFile(workbook, fileName);
+//   };
+
+//   const exportToPDF = () => {
+//     const doc = new jsPDF();
+    
+//     doc.setFontSize(16);
+//     doc.text(`${activeTab.toUpperCase()} LIST - ${selectedBatch === 'all' ? 'ALL BATCHES' : 'BATCH ' + selectedBatch}`, 14, 15);
+    
+//     const tableData = filteredUsers.map(user => [
+//       user.firstName || '',
+//       user.fatherName || '',
+//       user.username || '',
+//       user.userId || '',
+//       getUserRole(user) || '',
+//       user.batch || 'N/A',
+//       user.is_active ? 'Active' : 'Inactive'
+//     ]);
+
+//     autoTable(doc, {
+//       head: [['First Name', 'Father Name', 'Username', 'User ID', 'Role', 'Batch', 'Status']],
+//       body: tableData,
+//       startY: 25,
+//       theme: 'grid',
+//       styles: { fontSize: 9, cellPadding: 2 },
+//       headStyles: { 
+//         fillColor: [140, 140, 140],
+//         textColor: [255, 255, 255],
+//         fontStyle: 'bold'
+//       },
+//       alternateRowStyles: {
+//         fillColor: [240, 240, 240]
+//       }
+//     });
+
+//     const fileName = `${activeTab}_${selectedBatch === 'all' ? 'all_batches' : 'batch_' + selectedBatch}.pdf`;
+//     doc.save(fileName);
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+//         <div className="text-center">
+//           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
+//           <p className="text-gray-600">Loading users...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+//         <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm max-w-md">
+//           <div className="flex items-center">
+//             <svg className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+//             </svg>
+//             <strong className="font-bold">Error: </strong>
+//             <span className="ml-1">{error}</span>
+//           </div>
+//           <button
+//             onClick={fetchUsers}
+//             className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
+//           >
+//             Try Again
+//           </button>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const tabConfig = [
+//     { key: 'students', label: 'Students', icon: AcademicCapIcon, color: 'blue' },
+//     { key: 'teachers', label: 'Teachers', icon: UserGroupIcon, color: 'green' },
+//     { key: 'registeral', label: 'Registeral', icon: CogIcon, color: 'purple' },
+//     { key: 'department', label: 'Department', icon: BuildingLibraryIcon, color: 'orange' },
+//     { key: 'collage', label: 'College', icon: BuildingLibraryIcon, color: 'indigo' },
+//     { key: 'president', label: 'President', icon: UserCircleIcon, color: 'red' },
+//     { key: 'admin', label: 'Admin', icon: CogIcon, color: 'gray' }
+//   ];
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+//       {/* Header */}
+//       <div className="bg-white shadow-sm border-b">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="flex justify-between items-center py-6">
+//             <div>
+//               <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+//               <p className="text-gray-600 mt-1">Manage all system users efficiently</p>
+//             </div>
+//             <div className="flex items-center space-x-4">
+//               <div className="bg-blue-100 p-3 rounded-lg">
+//                 <UsersIcon className="h-6 w-6 text-blue-600" />
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Stats Cards */}
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+//           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+//             <div className="flex items-center">
+//               <div className="bg-blue-100 p-3 rounded-lg">
+//                 <UsersIcon className="h-6 w-6 text-blue-600" />
+//               </div>
+//               <div className="ml-4">
+//                 <p className="text-sm font-medium text-gray-600">Total Users</p>
+//                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+//             <div className="flex items-center">
+//               <div className="bg-green-100 p-3 rounded-lg">
+//                 <AcademicCapIcon className="h-6 w-6 text-green-600" />
+//               </div>
+//               <div className="ml-4">
+//                 <p className="text-sm font-medium text-gray-600">Students</p>
+//                 <p className="text-2xl font-bold text-gray-900">{stats.students}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+//             <div className="flex items-center">
+//               <div className="bg-purple-100 p-3 rounded-lg">
+//                 <UserGroupIcon className="h-6 w-6 text-purple-600" />
+//               </div>
+//               <div className="ml-4">
+//                 <p className="text-sm font-medium text-gray-600">Teachers</p>
+//                 <p className="text-2xl font-bold text-gray-900">{stats.teachers}</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+//             <div className="flex items-center">
+//               <div className="bg-green-100 p-3 rounded-lg">
+//                 <ChartBarIcon className="h-6 w-6 text-green-600" />
+//               </div>
+//               <div className="ml-4">
+//                 <p className="text-sm font-medium text-gray-600">Active Users</p>
+//                 <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Main Content */}
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+//           {/* Tab Navigation */}
+//           <div className="border-b border-gray-200">
+//             <nav className="flex space-x-8 px-6">
+//               {tabConfig.map((tab) => {
+//                 const IconComponent = tab.icon;
+//                 return (
+//                   <button
+//                     key={tab.key}
+//                     onClick={() => { setActiveTab(tab.key); setCurrentPage(1); setSearchTerm(''); }}
+//                     className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors ${
+//                       activeTab === tab.key
+//                         ? `border-${tab.color}-500 text-${tab.color}-600`
+//                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+//                     }`}
+//                   >
+//                     <IconComponent className="h-5 w-5" />
+//                     <span>{tab.label}</span>
+//                   </button>
+//                 );
+//               })}
+//             </nav>
+//           </div>
+
+//           {/* Controls */}
+//           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+//             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+//               <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+//                 {/* Search */}
+//                 <div className="relative">
+//                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+//                     <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+//                   </div>
+//                   <input
+//                     type="text"
+//                     placeholder="Search users..."
+//                     value={searchTerm}
+//                     onChange={(e) => setSearchTerm(e.target.value)}
+//                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
+//                   />
+//                 </div>
+
+//                 {/* Batch Filter */}
+//                 {activeTab === 'students' && batches.length > 0 && (
+//                   <div className="flex items-center space-x-2">
+//                     <label className="text-sm font-medium text-gray-700">Batch:</label>
+//                     <select
+//                       value={selectedBatch}
+//                       onChange={(e) => { setSelectedBatch(e.target.value); setCurrentPage(1); }}
+//                       className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+//                     >
+//                       <option value="all">All Batches</option>
+//                       {batches.map(batch => (
+//                         <option key={batch} value={batch}>{batch}</option>
+//                       ))}
+//                     </select>
+//                   </div>
+//                 )}
+//               </div>
+
+//               {/* Export Buttons */}
+//               <div className="flex space-x-3">
+//                 <button
+//                   onClick={exportToCSV}
+//                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+//                 >
+//                   <DocumentArrowDownIcon className="h-4 w-4" />
+//                   <span>Export CSV</span>
+//                 </button>
+//                 <button
+//                   onClick={exportToPDF}
+//                   className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+//                 >
+//                   <DocumentArrowDownIcon className="h-4 w-4" />
+//                   <span>Export PDF</span>
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Table */}
+//           <div className="px-6 py-4">
+//             <div className="flex items-center justify-between mb-4">
+//               <div className="flex items-center space-x-4">
+//                 <span className="text-sm text-gray-600">
+//                   Showing {Math.min(filteredUsers.length, 1)} to {Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length} results
+//                 </span>
+//               </div>
+//               <div className="flex items-center space-x-2">
+//                 <span className="text-sm text-gray-600">Show:</span>
+//                 <select
+//                   value={itemsPerPage}
+//                   onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+//                   className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+//                 >
+//                   <option value="5">5</option>
+//                   <option value="10">10</option>
+//                   <option value="20">20</option>
+//                   <option value="50">50</option>
+//                 </select>
+//                 <span className="text-sm text-gray-600">entries</span>
+//               </div>
+//             </div>
+
+//             <div className="overflow-x-auto rounded-lg border border-gray-200">
+//               <table className="min-w-full divide-y divide-gray-200">
+//                 <thead className="bg-gray-50">
+//                   <tr>
+//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                       User
+//                     </th>
+//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                       ID
+//                     </th>
+//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                       Role
+//                     </th>
+//                     {activeTab === 'students' && (
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                         Batch
+//                       </th>
+//                     )}
+//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                       Phone
+//                     </th>
+//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                       Status
+//                     </th>
+//                   </tr>
+//                 </thead>
+//                 <tbody className="bg-white divide-y divide-gray-200">
+//                   {currentItems.length > 0 ? (
+//                     currentItems.map(user => (
+//                       <tr key={user.username || user.id} className="hover:bg-gray-50 transition-colors">
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <div className="flex items-center">
+//                             <div className="flex-shrink-0 h-10 w-10">
+//                               {user.picture ? (
+//                                 <img
+//                                   className="h-10 w-10 rounded-full object-cover"
+//                                   src={user.picture}
+//                                   alt={user.firstName}
+//                                 />
+//                               ) : (
+//                                 <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+//                                   <span className="text-blue-600 font-medium">
+//                                     {user.firstName?.charAt(0) || 'U'}
+//                                     {user.fatherName?.charAt(0) || 'S'}
+//                                   </span>
+//                                 </div>
+//                               )}
+//                             </div>
+//                             <div className="ml-4">
+//                               <div className="text-sm font-medium text-gray-900">
+//                                 {user.firstName} {user.fatherName}
+//                               </div>
+//                               <div className="text-sm text-gray-500">
+//                                 @{user.username}
+//                               </div>
+//                             </div>
+//                           </div>
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+//                           {user.userId}
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+//                             {getUserRole(user)}
+//                           </span>
+//                         </td>
+//                         {activeTab === 'students' && (
+//                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+//                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+//                               {user.batch}
+//                             </span>
+//                           </td>
+//                         )}<td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                           {user.phoneNumber}
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+//                             user.is_active 
+//                               ? 'bg-green-100 text-green-800' 
+//                               : 'bg-red-100 text-red-800'
+//                           }`}>
+//                             {user.is_active ? 'Active' : 'Inactive'}
+//                           </span>
+//                         </td>
+                        
+//                       </tr>
+//                     ))
+//                   ) : (
+//                     <tr>
+//                       <td 
+//                         colSpan={activeTab === 'students' ? 6 : 5} 
+//                         className="px-6 py-8 text-center"
+//                       >
+//                         <div className="text-gray-500">
+//                           <UsersIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+//                           <p className="text-lg font-medium">No users found</p>
+//                           <p className="text-sm mt-1">
+//                             {searchTerm 
+//                               ? "Try adjusting your search terms" 
+//                               : `No ${activeTab} found in the system`
+//                             }
+//                           </p>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   )}
+//                 </tbody>
+//               </table>
+//             </div>
+
+//             {/* Pagination */}
+//             {filteredUsers.length > 0 && (
+//               <div className="flex items-center justify-between mt-6">
+//                 <div className="text-sm text-gray-700">
+//                   Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length} results
+//                 </div>
+//                 <div className="flex items-center space-x-2">
+//                   <button
+//                     onClick={() => paginate(Math.max(1, currentPage - 1))}
+//                     disabled={currentPage === 1}
+//                     className={`p-2 rounded-lg border ${
+//                       currentPage === 1 
+//                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+//                         : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+//                     }`}
+//                   >
+//                     <ChevronLeftIcon className="h-5 w-5" />
+//                   </button>
+                  
+//                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+//                     let pageNumber;
+//                     if (totalPages <= 5) {
+//                       pageNumber = i + 1;
+//                     } else if (currentPage <= 3) {
+//                       pageNumber = i + 1;
+//                     } else if (currentPage >= totalPages - 2) {
+//                       pageNumber = totalPages - 4 + i;
+//                     } else {
+//                       pageNumber = currentPage - 2 + i;
+//                     }
+                    
+//                     return (
+//                       <button
+//                         key={pageNumber}
+//                         onClick={() => paginate(pageNumber)}
+//                         className={`px-3 py-1 rounded-lg text-sm ${
+//                           currentPage === pageNumber
+//                             ? 'bg-blue-600 text-white'
+//                             : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+//                         }`}
+//                       >
+//                         {pageNumber}
+//                       </button>
+//                     );
+//                   })}
+                  
+//                   <button
+//                     onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+//                     disabled={currentPage === totalPages}
+//                     className={`p-2 rounded-lg border ${
+//                       currentPage === totalPages
+//                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+//                         : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+//                     }`}
+//                   >
+//                     <ChevronRightIcon className="h-5 w-5" />
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UserManagementDashboard;
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
-  UserIcon,
-  PencilIcon,
-  TrashIcon,
-  PlusIcon,
   MagnifyingGlassIcon,
-  ArrowPathIcon,
-  EyeIcon,
-  FunnelIcon,
-  XMarkIcon,
+  AcademicCapIcon,
+  UserGroupIcon,
+  BuildingLibraryIcon,
+  UserCircleIcon,
+  CogIcon,
+  DocumentArrowDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XCircleIcon
+  ChartBarIcon,
+  UsersIcon,
+  BellIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 
-const UsersManagement = () => {
+const UserManagementDashboard = () => {
   const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('students');
+  const [selectedBatch, setSelectedBatch] = useState('all');
+  const [batches, setBatches] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'view', 'edit'
-  const [filters, setFilters] = useState({
-    role: '',
-    gender: '',
-    category: ''
-  });
-  const [showFilters, setShowFilters] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(8);
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false, user: null });
-
-  // Auto-hide messages after 5 seconds
-  useEffect(() => {
-    if (message || error) {
-      const timer = setTimeout(() => {
-        setMessage('');
-        setError('');
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [message, error]);
-
-  // Filter users based on search and filters
-  useEffect(() => {
-    let result = users;
-
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(user =>
-        user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.fatherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.userId?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply role filter
-    if (filters.role) {
-      result = result.filter(user => user.role === filters.role);
-    }
-
-    // Apply gender filter
-    if (filters.gender) {
-      result = result.filter(user => user.gender === filters.gender);
-    }
-
-    // Apply category filter
-    if (filters.category) {
-      result = result.filter(user => user.catagory === filters.category);
-    }
-
-    setFilteredUsers(result);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [users, searchTerm, filters]);
-
-  // Fetch users from API
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('access');
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      const usersData = response.data.results || response.data || [];
-      setUsers(usersData);
-      setFilteredUsers(usersData);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      setError('Failed to fetch users. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [stats, setStats] = useState({ total: 0, students: 0, teachers: 0, active: 0 });
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Handle user deletion
-  const handleDelete = async (username) => {
+  const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('access');
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/users/${username}/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/`);
+      let usersData = [];
+      if (Array.isArray(response.data)) usersData = response.data;
+      else if (response.data?.results) usersData = response.data.results;
+      else if (response.data?.users) usersData = response.data.users;
+      else if (response.data && typeof response.data === 'object') usersData = Object.values(response.data);
+      else throw new Error('Format Error');
+
+      setUsers(usersData);
+      const userBatches = [...new Set(usersData.filter(u => u.batch).map(u => u.batch))];
+      setBatches(userBatches);
+
+      setStats({
+        total: usersData.length,
+        students: usersData.filter(u => getUserRole(u).toLowerCase().includes('student')).length,
+        teachers: usersData.filter(u => getUserRole(u).toLowerCase().includes('teacher')).length,
+        active: usersData.filter(u => u.is_active).length
       });
-      
-      setMessage('User deleted successfully!');
-      setDeleteModal({ isOpen: false, user: null });
-      fetchUsers(); // Refresh the list
+      setLoading(false);
     } catch (err) {
-      console.error('Error deleting user:', err);
-      setError('Failed to delete user. Please check your connection.');
+      setError('Failed to fetch users.');
+      setLoading(false);
     }
   };
 
-  // Debug function to see what data is being sent
-  const debugUpdate = async (userData) => {
-    try {
-      const token = localStorage.getItem('access');
-      
-      // Prepare the data in the format expected by the Django API
-      const updateData = {
-        firstName: userData.firstName || '',
-        fatherName: userData.fatherName || '',
-        grandFatherName: userData.grandFatherName || '',
-        motherName: userData.motherName || '',
-        phoneNumber: userData.phoneNumber || '',
-        gender: userData.gender || 'Male',
-        role: userData.role || 'student',
-        catagory: userData.catagory || '',
-        is_active: userData.is_active !== undefined ? userData.is_active : true,
-        userId: userData.userId || '',
-        username: userData.username || '',
-        handicap: userData.handicap || 'normal',
-        religion: userData.religion || '',
-        region: userData.region || '',
-        zone_or_special_wereda: userData.zone_or_special_wereda || '',
-        city_or_town: userData.city_or_town || '',
-        house_number: userData.house_number || '',
-        batch: userData.batch || '',
-        entrance_exam: userData.entrance_exam || '',
-        mothersFatherName: userData.mothersFatherName || '',
-        nationality: userData.nationality || '',
-        dob: userData.dob || null,
-        position: userData.position || ''
-      };
+  const getUserRole = (user) => user.role || user.userType || user.type || user.roleName || 'Unknown';
 
-      console.log('Sending data:', updateData);
+  const filteredUsers = users.filter(user => {
+    const userRole = getUserRole(user).toLowerCase();
+    const matchesSearch = searchTerm === '' || 
+      [user.firstName, user.fatherName, user.username, user.userId].some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const roleMap = {
+      students: 'student',
+      teachers: 'teacher',
+      registeral: 'registeral',
+      department: 'department',
+      collage: 'collage',
+      president: 'president',
+      admin: 'admin'
+    };
 
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}/users/${userData.username}/`, 
-        updateData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      console.log('Server response:', response.data);
-      return response;
-    } catch (err) {
-      console.error('Debug error:', err);
-      console.error('Error response:', err.response?.data);
-      throw err;
-    }
+    const matchesTab = userRole.includes(roleMap[activeTab]);
+    const matchesBatch = activeTab !== 'students' || selectedBatch === 'all' || user.batch === selectedBatch;
+
+    return matchesTab && matchesBatch && matchesSearch;
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginate = (num) => setCurrentPage(num);
+
+  const exportToCSV = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredUsers.map(u => ({
+      'Name': `${u.firstName} ${u.fatherName}`,
+      'Username': u.username,
+      'ID': u.userId,
+      'Role': getUserRole(u),
+      'Status': u.is_active ? 'Active' : 'Inactive'
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+    XLSX.writeFile(workbook, `${activeTab}_report.xlsx`);
   };
 
-  // Handle user update
-  const handleUpdate = async (userData) => {
-    setIsUpdating(true);
-    try {
-      // Use the debug function to see what's happening
-      const response = await debugUpdate(userData);
-      
-      setMessage('User updated successfully!');
-      setViewMode('list');
-      fetchUsers(); // Refresh the list
-    } catch (err) {
-      console.error('Error updating user:', err);
-      
-      // More detailed error handling
-      if (err.response?.data) {
-        const errorData = err.response.data;
-        if (typeof errorData === 'object') {
-          // Handle field validation errors
-          const errorMessages = Object.entries(errorData)
-            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-            .join('; ');
-          setError(`Update failed: ${errorMessages}`);
-        } else if (typeof errorData === 'string') {
-          setError(`Update failed: ${errorData}`);
-        } else {
-          setError('Failed to update user. Please check the data and try again.');
-        }
-      } else {
-        setError('Failed to update user. Please check your connection.');
-      }
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  // View user details
-  const viewUser = (user) => {
-    setSelectedUser(user);
-    setViewMode('view');
-  };
-
-  // Edit user
-  const editUser = (user) => {
-    setSelectedUser(user);
-    setViewMode('edit');
-  };
-
-  // Reset filters
-  const resetFilters = () => {
-    setFilters({
-      role: '',
-      gender: '',
-      category: ''
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    autoTable(doc, {
+      head: [['Name', 'ID', 'Role', 'Status']],
+      body: filteredUsers.map(u => [`${u.firstName} ${u.fatherName}`, u.userId, getUserRole(u), u.is_active ? 'Active' : 'Inactive']),
     });
-    setSearchTerm('');
+    doc.save(`${activeTab}_report.pdf`);
   };
 
-  // Pagination logic
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const tabConfig = [
+    { key: 'students', label: 'Students', icon: AcademicCapIcon },
+    { key: 'teachers', label: 'Teachers', icon: UserGroupIcon },
+    { key: 'registeral', label: 'Registrar', icon: CogIcon },
+    { key: 'department', label: 'Dept', icon: BuildingLibraryIcon },
+    { key: 'collage', label: 'College', icon: BuildingLibraryIcon },
+    { key: 'president', label: 'President', icon: UserCircleIcon },
+    { key: 'admin', label: 'Admin', icon: CogIcon }
+  ];
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  if (loading) return (
+    <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+  );
 
-  // Delete Confirmation Modal
-  const DeleteConfirmationModal = () => {
-    if (!deleteModal.isOpen) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-95 animate-in fade-in-90 zoom-in-90">
-          <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
-            <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
-          </div>
-          
-          <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Delete User</h3>
-          <p className="text-gray-600 text-center mb-6">
-            Are you sure you want to delete <span className="font-semibold">{deleteModal.user?.firstName} {deleteModal.user?.fatherName}</span>? This action cannot be undone.
-          </p>
-          
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setDeleteModal({ isOpen: false, user: null })}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleDelete(deleteModal.user.username)}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md hover:shadow-lg"
-            >
-              Delete User
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render user list view
-  const renderUserList = () => (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
-          <p className="text-gray-500 mt-1">{filteredUsers.length} users found</p>
-        </div>
-        <div className="flex space-x-3 mt-4 sm:mt-0">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`px-4 py-2 rounded-xl flex items-center transition-all ${
-              showFilters 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <FunnelIcon className="h-5 w-5 mr-2" />
-            Filters
-          </button>
-          <button
-            onClick={fetchUsers}
-            className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 flex items-center transition-all shadow-sm hover:shadow-md"
-          >
-            <ArrowPathIcon className="h-5 w-5 mr-2" />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="mb-6">
-        <div className="relative mb-4">
-          <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search users by name, username, or ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full transition-all bg-gray-50"
-          />
-        </div>
-
-        {showFilters && (
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl mb-4 border border-gray-200 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                <select
-                  value={filters.role}
-                  onChange={(e) => setFilters({...filters, role: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                >
-                  <option value="">All Roles</option>
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="registeral">Registeral</option>
-                  <option value="department Head">Department Head</option>
-                  <option value="college">College Head</option>
-                  <option value="president">President</option>
-                  <option value="admin">Admin</option>
-                </select>
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans pb-12">
+      {/* Primary Header */}
+      <header className="bg-slate-900 text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="bg-indigo-600 p-1.5 rounded-lg">
+                <AcademicCapIcon className="h-6 w-6 text-white" />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                <select
-                  value={filters.gender}
-                  onChange={(e) => setFilters({...filters, gender: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                >
-                  <option value="">All Genders</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => setFilters({...filters, category: e.target.value})}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                >
-                  <option value="">All Categories</option>
-                  <option value="Natural Science">Natural Science</option>
-                  <option value="Social Science">Social Science</option>
-                  <option value="Other">Other</option>
-                </select>
+              <span className="text-xl font-bold tracking-tight">EduAdmin Central</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="p-2 text-slate-300 hover:text-white"><BellIcon className="h-6 w-6" /></button>
+              <div className="flex items-center space-x-3 border-l border-slate-700 pl-4">
+                <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold">JD</div>
+                <span className="hidden md:block text-sm font-medium">Administrator</span>
               </div>
             </div>
-            <button
-              onClick={resetFilters}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center transition-colors font-medium"
-            >
-              <XMarkIcon className="h-4 w-4 mr-1" />
-              Clear all filters
-            </button>
           </div>
-        )}
+        </div>
+      </header>
+
+      {/* Sub-Header / Nav Navigation */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-1 overflow-x-auto no-scrollbar py-3">
+            {tabConfig.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.key 
+                  ? 'bg-indigo-600 text-white shadow-sm' 
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {/* Users Table */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading users...</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Total Users', value: stats.total, icon: UsersIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Students', value: stats.students, icon: AcademicCapIcon, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Staff', value: stats.teachers, icon: UserGroupIcon, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { label: 'Active Status', value: stats.active, icon: ChartBarIcon, color: 'text-amber-600', bg: 'bg-amber-50' },
+          ].map((stat, idx) => (
+            <div key={idx} className="bg-white p-5 rounded-xl border border-gray-200 flex items-center space-x-4">
+              <div className={`${stat.bg} p-3 rounded-lg`}>
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-xl font-black text-gray-900">{stat.value}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-          <UserIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-          <p className="text-lg font-medium text-gray-600">No users found</p>
-          <p className="text-sm mt-1">
-            {searchTerm || filters.role || filters.gender || filters.category 
-              ? "Try adjusting your search or filters" 
-              : "No users available in the system"}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User ID</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Gender</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+
+        {/* Main Content Card */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          {/* Action Bar */}
+          <div className="p-6 bg-white border-b border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-1 items-center gap-3">
+              <div className="relative w-full max-w-sm">
+                <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={`Search ${activeTab}...`}
+                  className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              {activeTab === 'students' && (
+                <select 
+                  className="border border-gray-200 rounded-lg px-4 py-2 bg-gray-50 text-sm outline-none hover:bg-white transition-colors cursor-pointer"
+                  value={selectedBatch}
+                  onChange={(e) => setSelectedBatch(e.target.value)}
+                >
+                  <option value="all">All Batches</option>
+                  {batches.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button onClick={exportToCSV} className="flex items-center space-x-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                <ArrowDownTrayIcon className="h-4 w-4" />
+                <span>Export CSV</span>
+              </button>
+              <button onClick={exportToPDF} className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 rounded-lg text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm transition-all">
+                <DocumentArrowDownIcon className="h-4 w-4" />
+                <span>Download PDF</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">User Name & Info</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">System ID</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Assigned Role</th>
+                  {activeTab === 'students' && <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Batch</th>}
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-center">Account Status</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentUsers.map((user) => (
-                  <tr key={user.username} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12">
-                          {user.picture ? (
-                            <img className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm" src={user.picture} alt={user.firstName} />
-                          ) : (
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-2 border-white shadow-sm">
-                              <UserIcon className="h-6 w-6 text-blue-600" />
-                            </div>
-                          )}
+              <tbody className="divide-y divide-gray-100">
+                {currentItems.map((user) => (
+                  <tr key={user.id || user.username} className="hover:bg-indigo-50/40 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-bold border border-indigo-200">
+                          {user.firstName?.charAt(0)}
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-semibold text-gray-900">
-                            {user.firstName} {user.fatherName}
-                          </div>
-                          <div className="text-sm text-gray-500">{user.username}</div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{user.firstName} {user.fatherName}</p>
+                          <p className="text-xs text-gray-400">{user.username}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded-md inline-block">{user.userId}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
-                        {user.role}
+                    <td className="px-6 py-4 text-sm font-mono text-gray-500">{user.userId}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-white border border-gray-200 text-gray-600">
+                        {getUserRole(user)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
-                      {user.gender}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full ${
-                        user.is_active 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => viewUser(user)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-2 rounded-lg hover:bg-blue-50 flex items-center"
-                          title="View details"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => editUser(user)}
-                          className="text-indigo-600 hover:text-indigo-800 transition-colors p-2 rounded-lg hover:bg-indigo-50 flex items-center"
-                          title="Edit user"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteModal({ isOpen: true, user })}
-                          className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-lg hover:bg-red-50 flex items-center"
-                          title="Delete user"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
+                    {activeTab === 'students' && (
+                      <td className="px-6 py-4 text-sm text-gray-600">{user.batch || 'N/A'}</td>
+                    )}
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {user.is_active ? 'Active' : 'Inactive'}
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -487,455 +882,33 @@ const UsersManagement = () => {
               </tbody>
             </table>
           </div>
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 px-2 space-y-4 sm:space-y-0">
-              <div className="text-sm text-gray-600">
-                Showing <span className="font-medium">{indexOfFirstUser + 1}</span> to{' '}
-                <span className="font-medium">
-                  {indexOfLastUser > filteredUsers.length ? filteredUsers.length : indexOfLastUser}
-                </span> of{' '}
-                <span className="font-medium">{filteredUsers.length}</span> results
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => paginate(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-sm"
-                >
-                  <ChevronLeftIcon className="h-4 w-4 mr-1" /> Previous
-                </button>
-                <div className="flex space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                    <button
-                      key={number}
-                      onClick={() => paginate(number)}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ${
-                        currentPage === number
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {number}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => paginate(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center shadow-sm"
-                >
-                  Next <ChevronRightIcon className="h-4 w-4 ml-1" />
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
 
-  // Render user detail view
-  const renderUserView = () => (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-      <div className="flex items-center mb-6">
-        <button 
-          onClick={() => setViewMode('list')}
-          className="mr-3 text-gray-500 hover:text-gray-700 flex items-center transition-colors p-2 rounded-lg hover:bg-gray-100"
-        >
-          <ChevronLeftIcon className="h-5 w-5 mr-1" /> Back to List
-        </button>
-        <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
-      </div>
-
-      {selectedUser && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl text-center border border-gray-200 shadow-sm">
-              {selectedUser.picture ? (
-                <img className="h-32 w-32 rounded-full mx-auto object-cover mb-4 border-4 border-white shadow-md" src={selectedUser.picture} alt={selectedUser.firstName} />
-              ) : (
-                <div className="h-32 w-32 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md">
-                  <UserIcon className="h-16 w-16 text-blue-600" />
-                </div>
-              )}
-              <h3 className="text-xl font-bold text-gray-900">
-                {selectedUser.firstName} {selectedUser.fatherName}
-              </h3>
-              <p className="text-gray-500">{selectedUser.username}</p>
-              <p className="text-sm text-gray-500 mt-1 font-mono">{selectedUser.userId}</p>
-              
-              <div className="mt-4">
-                <span className={`px-3 py-1.5 inline-flex text-sm leading-4 font-semibold rounded-full ${
-                  selectedUser.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {selectedUser.is_active ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-              
-              <button
-                onClick={() => editUser(selectedUser)}
-                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center"
+          {/* Footer / Pagination */}
+          <div className="px-6 py-4 bg-gray-50 flex items-center justify-between">
+            <span className="text-sm text-gray-500">
+              Showing <span className="font-bold text-gray-900">{indexOfFirstItem + 1}</span> to <span className="font-bold text-gray-900">{Math.min(indexOfLastItem, filteredUsers.length)}</span> of {filteredUsers.length} entries
+            </span>
+            <div className="flex space-x-1">
+              <button 
+                disabled={currentPage === 1}
+                onClick={() => paginate(currentPage - 1)}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
-                <PencilIcon className="h-4 w-4 mr-2" /> Edit User
+                <ChevronLeftIcon className="h-4 w-4 mr-1" /> Prev
+              </button>
+              <button 
+                disabled={currentPage === totalPages}
+                onClick={() => paginate(currentPage + 1)}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Next <ChevronRightIcon className="h-4 w-4 ml-1" />
               </button>
             </div>
           </div>
-          
-          <div className="md:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="font-semibold text-gray-700 mb-3 text-lg">Personal Information</h4>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Full Name</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{selectedUser.firstName} {selectedUser.fatherName} {selectedUser.grandFatherName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Mother's Name</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.motherName || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Date of Birth</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.dob || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Gender</dt>
-                    <dd className="text-sm text-gray-900 capitalize">{selectedUser.gender}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.phoneNumber || 'N/A'}</dd>
-                  </div>
-                </dl>
-              </div>
-              
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="font-semibold text-gray-700 mb-3 text-lg">Account Information</h4>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Role</dt>
-                    <dd className="text-sm text-gray-900 capitalize">{selectedUser.role}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Category</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.catagory || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Batch</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.batch || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Entrance Exam</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.entrance_exam || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Password Status</dt>
-                    <dd className="text-sm text-gray-900">
-                      {selectedUser.is_using_default_password ? 'Using Default Password' : 'Custom Password'}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm md:col-span-2">
-                <h4 className="font-semibold text-gray-700 mb-3 text-lg">Address Information</h4>
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Region</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.region || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Zone/Wereda</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.zone_or_special_wereda || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">City/Town</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.city_or_town || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">House Number</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.house_number || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Religion</dt>
-                    <dd className="text-sm text-gray-900">{selectedUser.religion || 'N/A'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Handicap</dt>
-                    <dd className="text-sm text-gray-900 capitalize">{selectedUser.handicap || 'N/A'}</dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
-    </div>
-  );
-
-  // Render user edit form
-  const renderUserEdit = () => (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-      <div className="flex items-center mb-6">
-        <button 
-          onClick={() => setViewMode('list')}
-          className="mr-3 text-gray-500 hover:text-gray-700 flex items-center transition-colors p-2 rounded-lg hover:bg-gray-100"
-        >
-          <ChevronLeftIcon className="h-5 w-5 mr-1" /> Back to List
-        </button>
-        <h2 className="text-2xl font-bold text-gray-800">Edit User</h2>
       </div>
-
-      {selectedUser && (
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleUpdate(selectedUser);
-        }} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
-              <input
-                type="text"
-                value={selectedUser.firstName || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, firstName: e.target.value})}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Father's Name *</label>
-              <input
-                type="text"
-                value={selectedUser.fatherName || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, fatherName: e.target.value})}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Grandfather's Name</label>
-              <input
-                type="text"
-                value={selectedUser.grandFatherName || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, grandFatherName: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mother's Name</label>
-              <input
-                type="text"
-                value={selectedUser.motherName || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, motherName: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-              <input
-                type="tel"
-                value={selectedUser.phoneNumber || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, phoneNumber: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
-              <select
-                value={selectedUser.gender || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, gender: e.target.value})}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
-              <select
-                value={selectedUser.role || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
-                required
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="registeral">Registeral</option>
-                <option value="department Head">Department Head</option>
-                <option value="college Head">College Head</option>
-                <option value="president">President</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select
-                value={selectedUser.catagory || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, catagory: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              >
-                <option value="">Select Category</option>
-                <option value="Natural Science">Natural Science</option>
-                <option value="Social Science">Social Science</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Active Status</label>
-              <select
-                value={selectedUser.is_active ? 'true' : 'false'}
-                onChange={(e) => setSelectedUser({...selectedUser, is_active: e.target.value === 'true'})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              >
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Region</label>
-              <input
-                type="text"
-                value={selectedUser.region || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, region: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Zone/Wereda</label>
-              <input
-                type="text"
-                value={selectedUser.zone_or_special_wereda || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, zone_or_special_wereda: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">City/Town</label>
-              <input
-                type="text"
-                value={selectedUser.city_or_town || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, city_or_town: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">House Number</label>
-              <input
-                type="text"
-                value={selectedUser.house_number || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, house_number: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Religion</label>
-              <input
-                type="text"
-                value={selectedUser.religion || ''}
-                onChange={(e) => setSelectedUser({...selectedUser, religion: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Handicap</label>
-              <select
-                value={selectedUser.handicap || 'normal'}
-                onChange={(e) => setSelectedUser({...selectedUser, handicap: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
-              >
-                <option value="normal">Normal</option>
-                <option value="case">Case</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 disabled:opacity-50 transition-all font-medium shadow-md hover:shadow-lg flex items-center"
-            >
-              {isUpdating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Updating...
-                </>
-              ) : (
-                'Update User'
-              )}
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 lg:p-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg">
-            <UserIcon className="h-10 w-10 text-white" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          User Management
-        </h1>
-        <p className="text-gray-600">View and manage all system users</p>
-      </div>
-
-      {/* Alert Messages */}
-      {message && (
-        <div className="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-xl flex items-center">
-          <CheckCircleIcon className="h-5 w-5 mr-2" />
-          <p className="font-medium">{message}</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl flex items-center">
-          <XCircleIcon className="h-5 w-5 mr-2" />
-          <p className="font-medium">{error}</p>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 gap-8">
-        {viewMode === 'list' && renderUserList()}
-        {viewMode === 'view' && renderUserView()}
-        {viewMode === 'edit' && renderUserEdit()}
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal />
     </div>
   );
 };
 
-export default UsersManagement;
+export default UserManagementDashboard;

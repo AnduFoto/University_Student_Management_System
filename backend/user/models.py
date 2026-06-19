@@ -76,8 +76,8 @@ class UsersAuths(AbstractBaseUser, PermissionsMixin):
         ('student', 'student'),
         ('registeral', 'registeral'),
         ('teacher', 'teacher'),
-        ('department Head', 'department Head'),
-        ('college Head', 'college Head'),
+        ('department', 'department'),
+        ('collage', 'collage'),
         ('president', 'president'),
         ('admin', 'admin'), 
     ]

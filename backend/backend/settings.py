@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'collages',
     'student',
     'teacher',
+    'grades',
     
 ]
 
@@ -49,7 +50,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
@@ -74,7 +75,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'StudentDB',  
+        'NAME': 'FinalCheckDB',  
         'USER': 'postgres',
         'PASSWORD': '1234', 
         'HOST': 'localhost',
@@ -113,9 +114,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # Add this for browsable API
+        'rest_framework.authentication.BasicAuthentication',    # Optional but helpful
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # For registration endpoint
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10000 
+    'PAGE_SIZE': 100
 }
 
 AUTHENTICATION_BACKENDS = ['user.auth_backend.UsersAuthBackend']

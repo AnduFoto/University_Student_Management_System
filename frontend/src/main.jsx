@@ -45,6 +45,10 @@ import TeacherDashboard from './components/teachers/TeacherDashboard.jsx';
 import TeacherInfo from './components/teachers/TeacherInfo.jsx'
 import AssignedTeachers from './components/collages/AssignedTeachers.jsx'
 import AllTeacher from './components/collages/AllTeacher.jsx'
+import GradeInsertionPage from './components/teachers/GradeInsertionPage.jsx';
+import UsernamePrint from './components/admin/UsernamePrint.jsx'
+import GradeApproval from './components/departments/GradeApprove.jsx';
+import EditMark from './components/teachers/EditMark.jsx'
 
 const router=createBrowserRouter([
 
@@ -133,12 +137,13 @@ const router=createBrowserRouter([
           path:'student-grade',
           element:<GradeCard/>,
           children:[
-             {
+           
+          ]
+          },
+            {
               path:'grade-list',
               element:<Grade/>,
              },
-          ]
-          },
           ]
         },
         ],
@@ -224,13 +229,18 @@ const router=createBrowserRouter([
             {
               path:'password-reset',
               element:<UserPasswordReset/>
+            },
+             {
+              path:'username-print',
+              element:<UsernamePrint/>
             }
           ]
+
         },
         ],
     },
 
-         {
+       {
         element: <PrivateRoute allowedRoles={["department"]} />,
         children: [
               {
@@ -244,7 +254,20 @@ const router=createBrowserRouter([
             {
               path:'courselist',
               element:<CourseList/>
-            }
+            },
+            {
+              path:'grade-approve',
+              element:<GradeApproval/>
+            },
+            
+            {
+              path:'teacher',
+              element:<RegisteredTeacher/>
+            },
+            {
+              path:'assigned-teacher',
+              element:<AssignedTeachers/>
+            },
           ]
         },
         ],
@@ -292,6 +315,14 @@ const router=createBrowserRouter([
             {
               path:'teacher',
               element:<RegisteredTeacher/>
+            },
+             {
+              path:'grade-insertion',
+              element:<GradeInsertionPage/>
+            },
+               {
+              path:'edit-mark',
+              element:<EditMark/>
             }
           ]
         },

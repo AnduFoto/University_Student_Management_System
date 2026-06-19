@@ -15,8 +15,6 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
-# # Create your views here.
-
 #############################User Registration################################################
 class UserRegisterView(APIView):
 
@@ -73,8 +71,6 @@ class UsersAuthsLoginView(APIView):
                 "change_password_required": True,
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-                "role": role,
-                "user": serializer.data,   
             }, status=status.HTTP_403_FORBIDDEN)
 
         return Response({

@@ -102,3 +102,10 @@ def check_registration(request):
 
     return JsonResponse({'exists': exists})
 
+
+
+
+
+############################################################################################
+
+
